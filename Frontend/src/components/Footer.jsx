@@ -1,5 +1,6 @@
 ﻿import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Youtube } from "lucide-react";
+import Logo from "@/assets/Logo_Bharat_Darshan.webp";
 
 const Footer = () => {
   return (
@@ -10,9 +11,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2">
-              <span className="font-serif font-bold text-2xl text-primary">
-                LOGO
-              </span>
+              <img src={Logo} alt="Bharat Darshan Logo" className="h-16 w-auto" />
             </Link>
             <p className="text-primary-foreground/80 leading-relaxed">
               Your trusted travel partner for authentic Odisha experiences. From sacred temples to pristine beaches, we craft unforgettable journeys.
