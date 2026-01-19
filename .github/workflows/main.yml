@@ -23,5 +23,5 @@ jobs:
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: Frontend/build # If using Vite, change this to Frontend/dist
+          folder: Frontend/dist # If using Vite, change this to Frontend/dist
           branch: gh-pages
