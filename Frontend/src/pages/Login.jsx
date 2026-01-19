@@ -9,7 +9,9 @@ import { toast } from "sonner";
 import Logo from "@/assets/Logo_Bharat_Darshan.webp";
 
 // API base URL - change for production
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+// API base URL - change for production
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = API_BASE.includes('/api') ? API_BASE : `${API_BASE.replace(/\/$/, "")}/api`;
 
 const Login = () => {
   const navigate = useNavigate();
