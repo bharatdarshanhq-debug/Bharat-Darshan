@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import Logo from "@/assets/Logo_Bharat_Darshan.webp";
 
 // API base URL - change for production
-const API_URL = "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const Login = () => {
   const navigate = useNavigate();
