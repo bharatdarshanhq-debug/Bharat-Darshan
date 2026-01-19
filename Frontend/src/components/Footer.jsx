@@ -1,6 +1,6 @@
 ﻿import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Youtube } from "lucide-react";
-import Logo from "@/assets/Logo_Bharat_Darshan.webp";
+import Logo from "@/assets/White_Logo_Bharat_Darshan.webp";
 
 const Footer = () => {
   return (
