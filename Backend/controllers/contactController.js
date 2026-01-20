@@ -12,21 +12,19 @@ const getTransporter = () => {
     
     // Use explicit SMTP settings instead of 'service: gmail'
     // This works better on cloud servers like Render
+    // Using port 465 (SSL) instead of 587 (STARTTLS) - often works when 587 is blocked
     transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // Use STARTTLS
+      port: 465,
+      secure: true, // Use SSL (port 465)
       auth: {
         user: process.env.EMAIL_USER.trim(), // Trim any whitespace
         pass: process.env.EMAIL_PASS.trim()  // Trim any whitespace
       },
-      tls: {
-        rejectUnauthorized: false // Allow self-signed certificates
-      },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-      debug: true, // Enable debug logging
+      connectionTimeout: 30000, // 30 seconds for cloud
+      greetingTimeout: 30000,
+      socketTimeout: 30000,
+      debug: true,
       logger: true
     });
 
