@@ -1,83 +1,53 @@
 const Contact = require('../models/Contact');
-const nodemailer = require('nodemailer');
 
-// Create reusable transporter with explicit SMTP settings
-let transporter = null;
-let transporterVerified = false;
-
-const getTransporter = () => {
-  if (!transporter && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-    console.log('[Email] Creating transporter with user:', process.env.EMAIL_USER);
-    console.log('[Email] Password length:', process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0);
-    
-    // Use explicit SMTP settings instead of 'service: gmail'
-    // This works better on cloud servers like Render
-    // Using port 465 (SSL) instead of 587 (STARTTLS) - often works when 587 is blocked
-    transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true, // Use SSL (port 465)
-      auth: {
-        user: process.env.EMAIL_USER.trim(), // Trim any whitespace
-        pass: process.env.EMAIL_PASS.trim()  // Trim any whitespace
-      },
-      connectionTimeout: 30000, // 30 seconds for cloud
-      greetingTimeout: 30000,
-      socketTimeout: 30000,
-      debug: true,
-      logger: true
-    });
-
-    // Verify transporter connection
-    transporter.verify((error, success) => {
-      if (error) {
-        console.error('[Email] Transporter verification FAILED:', error.message);
-        console.error('[Email] Error code:', error.code);
-        console.error('[Email] Full error:', JSON.stringify(error, null, 2));
-      } else {
-        console.log('[Email] Transporter verified successfully - ready to send!');
-        transporterVerified = true;
-      }
-    });
-  }
-  return transporter;
-};
-
-// Async function to send email (non-blocking)
+// Send email using Resend API (works on cloud providers where SMTP is blocked)
 const sendEmailNotification = async (contactData) => {
-  const emailTransporter = getTransporter();
+  const RESEND_API_KEY = process.env.RESEND_API_KEY;
   
-  if (!emailTransporter) {
-    console.log('[Contact] Email credentials not configured, skipping email notification');
+  if (!RESEND_API_KEY) {
+    console.log('[Email] RESEND_API_KEY not configured, skipping email notification');
+    console.log('[Email] Get your free API key at: https://resend.com');
     return;
   }
 
   const { name, email, phone, message, package: packageType, destination } = contactData;
 
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER,
-    subject: `New Contact Inquiry from ${name}`,
-    html: `
-      <h3>New Contact Inquiry</h3>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Phone:</strong> ${phone}</p>
-      <p><strong>Package Interest:</strong> ${packageType || 'Not specified'}</p>
-      <p><strong>Destination:</strong> ${destination || 'Not specified'}</p>
-      <p><strong>Message:</strong></p>
-      <p>${message}</p>
-    `
-  };
+  const emailHtml = `
+    <h3>New Contact Inquiry</h3>
+    <p><strong>Name:</strong> ${name}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Phone:</strong> ${phone}</p>
+    <p><strong>Package Interest:</strong> ${packageType || 'Not specified'}</p>
+    <p><strong>Destination:</strong> ${destination || 'Not specified'}</p>
+    <p><strong>Message:</strong></p>
+    <p>${message}</p>
+  `;
 
   try {
-    await emailTransporter.sendMail(mailOptions);
-    console.log('[Contact] Email sent successfully to', process.env.EMAIL_USER);
-  } catch (emailErr) {
-    console.error('[Contact] Email sending failed:', emailErr.message);
-    console.error('[Contact] Email error code:', emailErr.code);
-    console.error('[Contact] Email error response:', emailErr.response);
-    // Don't throw - email failure should not affect the response
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'Bharat Darshan <onboarding@resend.dev>', // Use Resend's default domain (free)
+        to: process.env.EMAIL_USER || 'bharatdarshan.hq@gmail.com',
+        subject: `New Contact Inquiry from ${name}`,
+        html: emailHtml,
+        reply_to: email // So you can reply directly to the customer
+      })
+    });
+
+    const data = await response.json();
+    
+    if (response.ok) {
+      console.log('[Email] Sent successfully via Resend! ID:', data.id);
+    } else {
+      console.error('[Email] Resend API error:', data.message || JSON.stringify(data));
+    }
+  } catch (err) {
+    console.error('[Email] Failed to send via Resend:', err.message);
   }
 };
 
@@ -99,17 +69,16 @@ exports.submitContactForm = async (req, res) => {
 
     console.log('[Contact] Saved to database successfully:', contact._id);
 
-    // IMPORTANT: Send response IMMEDIATELY after DB save
-    // Don't wait for email - this is the key fix for the 3-minute delay!
+    // Send response IMMEDIATELY after DB save
     res.status(201).json({
       success: true,
       data: contact,
       message: 'Thank you for contacting us! We will get back to you soon.'
     });
 
-    // Fire-and-forget: Send email in background AFTER response is sent
+    // Fire-and-forget: Send email in background
     sendEmailNotification({ name, email, phone, message, package: packageType, destination })
-      .catch(err => console.error('[Contact] Background email error:', err.message));
+      .catch(err => console.error('[Email] Background error:', err.message));
 
   } catch (err) {
     console.error('[Contact] Error:', err.message);
@@ -120,3 +89,4 @@ exports.submitContactForm = async (req, res) => {
     });
   }
 };
+
