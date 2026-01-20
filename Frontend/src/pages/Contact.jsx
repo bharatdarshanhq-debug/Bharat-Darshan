@@ -39,15 +39,53 @@ const Contact = () => {
     phone: "",
     message: "",
     package: "",
+    destination: "",
   });
+
+  const destinations = ["Puri", "Bhubaneswar", "Chilika", "Konark"];
   const [submitted, setSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState(0);
 
-  const handleSubmit = (e) => {
+  const [status, setStatus] = useState({ loading: false, error: null });
+
+  // API URL construction - handles cases where VITE_API_URL includes /api
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const API_URL = API_BASE.includes('/api') ? API_BASE : `${API_BASE.replace(/\/$/, "")}/api`;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setFormData({ name: "", email: "", phone: "", message: "", package: "" });
-    setTimeout(() => setSubmitted(false), 5000);
+    setStatus({ loading: true, error: null });
+    
+    const contactUrl = `${API_URL}/contact`;
+    console.log('[Contact] Submitting to:', contactUrl);
+    console.log('[Contact] Form Data:', formData);
+    
+    try {
+      const res = await fetch(contactUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      console.log('[Contact] Response status:', res.status);
+      const data = await res.json();
+      console.log('[Contact] Response data:', data);
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+
+      setSubmitted(true);
+      setFormData({ name: "", email: "", phone: "", message: "", package: "" });
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch (err) {
+      console.error('[Contact] Error:', err);
+      setStatus({ loading: false, error: err.message });
+    } finally {
+      setStatus(prev => ({ ...prev, loading: false }));
+    }
   };
 
   return (
@@ -172,21 +210,40 @@ const Contact = () => {
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
-                        Interested Package
-                      </label>
-                      <select
-                        value={formData.package}
-                        onChange={(e) => setFormData({ ...formData, package: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      >
-                        <option value="">Select a package</option>
-                        <option value="Royal Odisha Experience">Royal Odisha Experience (Elite)</option>
-                        <option value="Odisha Heritage Tour">Odisha Heritage Tour (Pro)</option>
-                        <option value="Budget Temple Trail">Budget Temple Trail (Premium)</option>
-                        <option value="Custom">Custom Tour</option>
-                      </select>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                          Interested Package
+                        </label>
+                        <select
+                          value={formData.package}
+                          onChange={(e) => setFormData({ ...formData, package: e.target.value, destination: "" })}
+                          className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        >
+                          <option value="">Select a package</option>
+                          <option value="Premium">Premium</option>
+                          <option value="Pro">Pro</option>
+                          <option value="Elite">Elite</option>
+                        </select>
+                      </div>
+
+                      {formData.package && (
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">
+                            Destination
+                          </label>
+                          <select
+                            value={formData.destination}
+                            onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
+                            className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          >
+                            <option value="">Select destination</option>
+                            {destinations.map((dest) => (
+                              <option key={dest} value={dest}>{dest}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -203,9 +260,22 @@ const Contact = () => {
                       />
                     </div>
 
-                    <Button type="submit" variant="hero" size="xl" className="w-full">
-                      Send Message
-                      <Send className="w-5 h-5" />
+
+                    {status.error && (
+                      <div className="text-red-500 text-sm mb-4 bg-red-50 p-3 rounded-lg border border-red-200">
+                        {status.error}
+                      </div>
+                    )}
+
+                    <Button 
+                      type="submit" 
+                      variant="hero" 
+                      size="xl" 
+                      className="w-full"
+                      disabled={status.loading}
+                    >
+                      {status.loading ? 'Sending...' : 'Send Message'}
+                      {!status.loading && <Send className="w-5 h-5 ml-2" />}
                     </Button>
                   </form>
                 )}

@@ -1,0 +1,86 @@
+================================================================================
+                    CONTACT SECTION - FUNCTIONALITY & TECHNICAL OVERVIEW
+================================================================================
+
+📍 FUNCTIONALITY
+--------------------------------------------------------------------------------
+The Contact section allows visitors to:
+1. Submit inquiries via a web form (name, phone, email, package, destination, message)
+2. View company contact details (phone, WhatsApp, email, office address)
+3. Browse FAQs for common travel questions
+4. Directly call or WhatsApp the business
+
+📍 FEATURES
+--------------------------------------------------------------------------------
+✅ Contact Form
+   - Fields: Name, Phone, Email, Package (Premium/Pro/Elite), Destination, Message
+   - Cascading Dropdowns: Destination appears only after selecting a Package
+   - Real-time validation and error handling
+   - Loading state with disabled button during submission
+   - Success banner on successful submission
+
+✅ Quick Contact Cards
+   - Call: Direct tel: link to +91 72050 99129
+   - WhatsApp: Direct wa.me link for instant messaging
+   - Email: mailto: link to bharatdarshan.hq@gmail.com
+   - 24/7 Support indicator
+
+✅ FAQ Accordion
+   - 6 pre-defined questions about bookings, cancellations, meals, etc.
+   - Expandable/collapsible answers
+
+📍 TECHNICAL LOGIC
+--------------------------------------------------------------------------------
+FRONTEND (Contact.jsx)
+-----------------------
+- React functional component with useState hooks
+- Framer Motion for animations
+- Form state management with controlled inputs
+- Cascading dropdown logic: destination resets when package changes
+- Available Packages: Premium, Pro, Elite
+- Available Destinations: Puri, Bhubaneswar, Chilika, Konark
+- API call: POST /api/contact
+- Error handling with try-catch and user feedback
+
+BACKEND (Node.js + Express)
+---------------------------
+Files:
+- models/Contact.js      → Mongoose schema for storing inquiries
+- controllers/contactController.js → Business logic + email sending
+- routes/contactRoutes.js → Route definition (POST /)
+- server.js              → Route registration (/api/contact)
+
+Flow:
+1. Frontend submits JSON → POST /api/contact
+2. Controller saves data to MongoDB (Contact collection)
+3. If EMAIL_USER & EMAIL_PASS exist in .env:
+   - Nodemailer sends email to admin with inquiry details
+4. Returns success response to frontend
+
+EMAIL INTEGRATION (Nodemailer)
+------------------------------
+- Service: Gmail (configurable)
+- Auth: App Password (not regular password)
+- Recipient: Same as EMAIL_USER (admin receives inquiries)
+- Content: HTML email with all form fields including package and destination
+
+📍 DATABASE SCHEMA (MongoDB)
+--------------------------------------------------------------------------------
+Collection: contacts
+Fields:
+- name: String (required)
+- email: String (required, validated)
+- phone: String (required)
+- message: String (required)
+- package: String (default: "General Inquiry") - Premium/Pro/Elite
+- destination: String (default: "") - Puri/Bhubaneswar/Chilika/Konark
+- status: Enum ["New", "Contacted", "Resolved"] (default: "New")
+- createdAt: Date (auto)
+
+📍 ENVIRONMENT VARIABLES REQUIRED
+--------------------------------------------------------------------------------
+Backend/.env:
+- EMAIL_USER=your-gmail@gmail.com
+- EMAIL_PASS=xxxx-xxxx-xxxx-xxxx (Gmail App Password)
+
+================================================================================

@@ -10,6 +10,9 @@ import Experiences from "./pages/Experiences";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile";
+import Bookings from "./pages/Bookings";
+import BookingDetail from "./pages/BookingDetail";
 
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -30,6 +33,9 @@ const App = () => (
           <Route path="/experiences" element={<Experiences />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/bookings" element={<Bookings />} />
+          <Route path="/bookings/:id" element={<BookingDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

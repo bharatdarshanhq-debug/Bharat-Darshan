@@ -19,6 +19,9 @@ app.use(
 
 app.use(express.json());
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/bookings', require('./routes/bookingRoutes'));
+app.use('/api/contact', require('./routes/contactRoutes'));
+
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Bharat Darshan API is running' });
