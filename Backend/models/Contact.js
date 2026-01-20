@@ -11,7 +11,8 @@ const contactSchema = new mongoose.Schema({
     match: [
       /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
       'Please add a valid email'
-    ]
+    ],
+    index: true  // Add index for faster lookups
   },
   phone: {
     type: String,
@@ -32,12 +33,15 @@ const contactSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['New', 'Contacted', 'Resolved'],
-    default: 'New'
+    default: 'New',
+    index: true  // Add index for filtering by status
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
+    index: true  // Add index for sorting by date
   }
 });
 
 module.exports = mongoose.model('Contact', contactSchema);
+
