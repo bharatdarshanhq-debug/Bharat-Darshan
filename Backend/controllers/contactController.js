@@ -1,21 +1,45 @@
 const Contact = require('../models/Contact');
 const nodemailer = require('nodemailer');
 
-// Create reusable transporter with timeout settings
+// Create reusable transporter with explicit SMTP settings
 let transporter = null;
+let transporterVerified = false;
 
 const getTransporter = () => {
   if (!transporter && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    console.log('[Email] Creating transporter with user:', process.env.EMAIL_USER);
+    console.log('[Email] Password length:', process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0);
+    
+    // Use explicit SMTP settings instead of 'service: gmail'
+    // This works better on cloud servers like Render
     transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // Use STARTTLS
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: process.env.EMAIL_USER.trim(), // Trim any whitespace
+        pass: process.env.EMAIL_PASS.trim()  // Trim any whitespace
       },
-      // Add timeout settings to prevent hanging
-      connectionTimeout: 10000, // 10 seconds
+      tls: {
+        rejectUnauthorized: false // Allow self-signed certificates
+      },
+      connectionTimeout: 10000,
       greetingTimeout: 10000,
-      socketTimeout: 15000
+      socketTimeout: 15000,
+      debug: true, // Enable debug logging
+      logger: true
+    });
+
+    // Verify transporter connection
+    transporter.verify((error, success) => {
+      if (error) {
+        console.error('[Email] Transporter verification FAILED:', error.message);
+        console.error('[Email] Error code:', error.code);
+        console.error('[Email] Full error:', JSON.stringify(error, null, 2));
+      } else {
+        console.log('[Email] Transporter verified successfully - ready to send!');
+        transporterVerified = true;
+      }
     });
   }
   return transporter;
