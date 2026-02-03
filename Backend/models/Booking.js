@@ -53,6 +53,46 @@ const bookingSchema = new mongoose.Schema(
     specialRequests: {
       type: String,
     },
+    // Payment Gateway Fields
+    paymentId: {
+      type: String,
+      default: null,
+    },
+    orderId: {
+      type: String,
+      default: null,
+    },
+    paymentMethod: {
+      type: String,
+      enum: ['razorpay', 'upi', 'card', 'netbanking', 'wallet', null],
+      default: null,
+    },
+    paymentDetails: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+    // Pricing Details
+    basePrice: {
+      type: Number,
+    },
+    gstAmount: {
+      type: Number,
+      default: 0,
+    },
+    couponCode: {
+      type: String,
+      default: null,
+    },
+    couponDiscount: {
+      type: Number,
+      default: 0,
+    },
+    // Hotel Selection
+    selectedHotels: [{
+      city: { type: String, required: true },
+      hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },
+      hotelName: { type: String, required: true },
+    }],
   },
   {
     timestamps: true,

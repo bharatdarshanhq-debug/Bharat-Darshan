@@ -1,0 +1,41 @@
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+const adminAuthService = {
+  login: async (email, password) => {
+    const response = await fetch(`${API_URL}/admin/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      localStorage.setItem('adminToken', data.token);
+      localStorage.setItem('adminUser', JSON.stringify(data.admin));
+    }
+
+    return data;
+  },
+
+  logout: () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+  },
+
+  getToken: () => {
+    return localStorage.getItem('adminToken');
+  },
+
+  getAdminUser: () => {
+    return JSON.parse(localStorage.getItem('adminUser'));
+  },
+
+  isAuthenticated: () => {
+    return !!localStorage.getItem('adminToken');
+  }
+};
+
+export default adminAuthService;

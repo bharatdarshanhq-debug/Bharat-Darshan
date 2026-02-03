@@ -57,8 +57,7 @@ const Contact = () => {
     setStatus({ loading: true, error: null });
     
     const contactUrl = `${API_URL}/contact`;
-    console.log('[Contact] Submitting to:', contactUrl);
-    console.log('[Contact] Form Data:', formData);
+
     
     try {
       const res = await fetch(contactUrl, {
@@ -68,10 +67,6 @@ const Contact = () => {
         },
         body: JSON.stringify(formData),
       });
-
-      console.log('[Contact] Response status:', res.status);
-      const data = await res.json();
-      console.log('[Contact] Response data:', data);
 
       if (!res.ok) {
         throw new Error(data.error || 'Something went wrong');

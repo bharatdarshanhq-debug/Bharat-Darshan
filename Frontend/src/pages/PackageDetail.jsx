@@ -1,23 +1,72 @@
-﻿import { useState } from "react";
+﻿import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { sonnerToast as toast } from "@/components/ui/feedback";
 import { motion } from "framer-motion";
 import {
   Star, Clock, Users, MapPin, Check, X, ChevronDown, ChevronUp,
-  Phone, MessageCircle, Calendar, Utensils, Hotel, Car, Shield, ArrowLeft
+  Phone, MessageCircle, Calendar, Utensils, Hotel, Car, Shield, ArrowLeft, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/forms";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { packages } from "@/data/packages";
+import BookingModal from "@/components/BookingModal";
+import { fetchPackageById } from "@/services/packageService";
 
 const PackageDetail = () => {
   const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState(0);
   const [expandedDay, setExpandedDay] = useState(1);
   const [travelers, setTravelers] = useState(2);
+  const [pkg, setPkg] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
-  const pkg = packages.find(p => p.id === Number(id));
+  // Get user from localStorage
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    const loadPackage = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch from API
+        const packageData = await fetchPackageById(id);
+        // Map roomType back to type for hotelDetails display
+        if (packageData.hotelDetails) {
+          packageData.hotelDetails = packageData.hotelDetails.map(h => ({
+            ...h,
+            type: h.roomType || h.type
+          }));
+        }
+        setPkg(packageData);
+      } catch (err) {
+        console.error('Failed to load package:', err.message);
+        setError('Package not found or server error');
+        setPkg(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadPackage();
+  }, [id]);
+
+  const handleBookNow = () => {
+    if (!user || !token) {
+      toast.error('Please login to book this package');
+      return;
+    }
+    setShowBookingModal(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6]">
+        <Loader2 className="w-10 h-10 text-orange-600 animate-spin" />
+      </div>
+    );
+  }
 
   if (!pkg) {
     return (
@@ -42,10 +91,18 @@ const PackageDetail = () => {
       <main className="pt-24 md:pt-32">
         {/* Breadcrumb */}
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
+          <div className="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
             <Link to="/" className="hover:text-orange-600 transition-colors">Home</Link>
             <span>/</span>
             <Link to="/packages" className="hover:text-orange-600 transition-colors">Packages</Link>
+            <span>/</span>
+            <Link to={`/packages?state=odisha`} className="hover:text-orange-600 transition-colors">
+              {pkg.stateName || "Odisha"}
+            </Link>
+            <span>/</span>
+            <Link to={`/packages?state=odisha&destination=${pkg.primaryDestination}`} className="hover:text-orange-600 transition-colors">
+              {pkg.primaryDestination}
+            </Link>
             <span>/</span>
             <span className="text-gray-900 font-medium">{pkg.name}</span>
           </div>
@@ -171,7 +228,7 @@ const PackageDetail = () => {
                    <Button 
                     size="xl" 
                     className="w-full bg-orange-600 hover:bg-orange-700 text-white rounded-xl h-14 text-lg font-medium shadow-orange-200 shadow-lg"
-                    onClick={() => toast.info("Booking feature coming soon! Please connect with us via Call or WhatsApp.")}
+                    onClick={handleBookNow}
                   >
                     Request Booking for ₹ {totalPrice.toLocaleString()}
                   </Button>
@@ -348,7 +405,7 @@ const PackageDetail = () => {
                 variant="outline"
                 size="xl" 
                 className="bg-white text-orange-600 hover:bg-orange-50 border-none h-14 px-8 rounded-xl text-lg shadow-xl"
-                onClick={() => toast.info("Booking feature coming soon!")}
+                onClick={handleBookNow}
               >
                 Book This Package
               </Button>
@@ -357,6 +414,15 @@ const PackageDetail = () => {
       </main>
 
       <Footer />
+
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+        pkg={pkg}
+        user={user}
+        token={token}
+      />
     </div>
   );
 };

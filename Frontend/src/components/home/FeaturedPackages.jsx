@@ -1,23 +1,69 @@
-﻿import { motion } from "framer-motion";
+﻿import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/forms";
-import { Star, Check, ArrowRight, Shield, Zap, Crown, Clock, MapPin, Users } from "lucide-react";
+import { Star, ArrowRight, Clock, MapPin, Users, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { packages } from "@/data/packages";
-
-// Get one package of each type (Elite, Pro, Premium) from Puri or Bhubaneswar
-const relevantPackages = packages.filter(p => ["Puri", "Bhubaneswar"].includes(p.primaryDestination));
-const elitePkg = relevantPackages.find(p => p.type === "Elite");
-const proPkg = relevantPackages.find(p => p.type === "Pro");
-const premiumPkg = relevantPackages.find(p => p.type === "Premium");
-
-// Create distinct list
-const sortedPackages = [elitePkg, proPkg, premiumPkg].filter(Boolean);
+import { fetchPackages } from "@/services/packageService";
 
 /**
  * Component to display a curated list of featured packages.
- * Shows one package from each tier (Elite, Pro, Premium) for specific destinations.
+ * Fetches packages from API and shows one from each tier (Elite, Pro, Premium).
  */
 const FeaturedPackages = () => {
+  const [packages, setPackages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadPackages = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchPackages();
+        
+        // Get packages from Puri or Bhubaneswar for featured section
+        const relevantPackages = data.filter(p => 
+          ["Puri", "Bhubaneswar"].includes(p.primaryDestination)
+        );
+        
+        // Get one package of each type (Elite, Pro, Premium)
+        const elitePkg = relevantPackages.find(p => p.type === "Elite");
+        const proPkg = relevantPackages.find(p => p.type === "Pro");
+        const premiumPkg = relevantPackages.find(p => p.type === "Premium");
+        
+        // Create distinct list
+        const sortedPackages = [elitePkg, proPkg, premiumPkg].filter(Boolean);
+        
+        // If we don't have enough tier-specific packages, just use the first 3
+        if (sortedPackages.length === 0 && data.length > 0) {
+          setPackages(data.slice(0, 3));
+        } else {
+          setPackages(sortedPackages);
+        }
+      } catch (err) {
+        console.error('Error loading featured packages:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadPackages();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-24 bg-[#FAF9F6]">
+        <div className="container mx-auto px-4 flex justify-center items-center min-h-[400px]">
+          <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+        </div>
+      </section>
+    );
+  }
+
+  if (error || packages.length === 0) {
+    return null; // Don't show the section if there's an error or no packages
+  }
+
   return (
     <section className="py-24 bg-[#FAF9F6]">
       <div className="container mx-auto px-4">
@@ -38,13 +84,24 @@ const FeaturedPackages = () => {
 
         {/* Tiers Grid */}
         <div className="grid md:grid-cols-3 gap-8 items-start">
-          {sortedPackages.map((pkg, index) => {
+          {packages.map((pkg, index) => {
             const isElite = pkg.type === "Elite";
             const isPro = pkg.type === "Pro";
             
+            // Get the main image - handle both array and single image
+            const mainImage = Array.isArray(pkg.images) && pkg.images.length > 0 
+              ? pkg.images[0] 
+              : (pkg.image || '/placeholder.svg');
+            
+            // Get locations array or construct from primaryDestination
+            const locations = pkg.locations || [pkg.primaryDestination];
+            
+            // Get highlights or facilities
+            const features = pkg.highlights || pkg.facilities || [];
+            
             return (
               <motion.div
-                key={pkg.id}
+                key={pkg._id || pkg.id || index}
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -54,7 +111,7 @@ const FeaturedPackages = () => {
                 {/* Image Section */}
                 <div className="h-56 w-full overflow-hidden relative">
                     <img 
-                        src={pkg.image} 
+                        src={mainImage} 
                         alt={pkg.name} 
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
@@ -74,7 +131,7 @@ const FeaturedPackages = () => {
                      {/* Rating Overlay */}
                      <div className="absolute top-4 right-4 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-bold shadow-sm">
                         <Star className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
-                        <span className="text-gray-900">{pkg.rating}</span>
+                        <span className="text-gray-900">{pkg.rating || 4.5}</span>
                     </div>
                 </div>
 
@@ -103,14 +160,14 @@ const FeaturedPackages = () => {
                         <div className="flex items-start gap-1.5 text-xs mb-4 text-orange-500">
                         <MapPin className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                         <span className="text-gray-600">
-                            {pkg.locations.join(" → ")}
+                            {locations.join(" → ")}
                         </span>
                         </div>
                     </div>
 
                     {/* Facilities (Tags) */}
                     <div className="flex flex-wrap gap-2 mb-8">
-                    {(pkg.highlights || pkg.facilities.slice(0, 4)).map((feature, i) => (
+                    {features.slice(0, 4).map((feature, i) => (
                         <span 
                         key={i} 
                         className="text-xs px-2.5 py-1 rounded-md font-medium bg-orange-50 text-orange-700 border border-orange-100"
@@ -123,7 +180,7 @@ const FeaturedPackages = () => {
 
                 {/* CTA */}
                 <div className="mt-auto px-8 pb-8">
-                    <Link to={`/packages?destination=${pkg.primaryDestination}`}>
+                    <Link to={`/packages?state=odisha&destination=${pkg.primaryDestination}`}>
                     <Button 
                         variant="outline" 
                         className="w-full py-6 rounded-xl text-base font-medium transition-all hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"

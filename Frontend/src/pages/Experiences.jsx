@@ -4,8 +4,12 @@ import { Button } from "@/components/ui/forms";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import heroImage from "@/assets/hero-puri-beach.jpg";
-import jagannathImage from "@/assets/jagannath-temple.jpg";
+
+import jagannathImage from "@/assets/Experience2.webp";
+import experienceHero from "@/assets/ExperienceHero.webp";
+import experience2 from "@/assets/Experience2.webp";
+import experience3 from "@/assets/Experience3.webp";
+import experience4 from "@/assets/Experience4.webp";
 
 const whyChooseUs = [
   {
@@ -45,19 +49,19 @@ const experiences = [
     icon: Camera,
     title: "Spiritual Journeys",
     description: "Connect with the divine at Jagannath Temple, experience ancient rituals, and find inner peace at sacred sites.",
-    image: jagannathImage,
+    image: experience2,
   },
   {
     icon: Camera,
     title: "Heritage Exploration",
     description: "Walk through centuries of history at Konark Sun Temple, ancient caves, and architectural marvels of Kalinga dynasty.",
-    image: jagannathImage,
+    image: experience3,
   },
   {
     icon: Camera,
     title: "Cultural Immersion",
     description: "Taste authentic Odia cuisine, watch classical Odissi dance, and experience the warmth of local hospitality.",
-    image: jagannathImage,
+    image: experience4,
   },
 ];
 
@@ -77,7 +81,7 @@ const Experiences = () => {
         {/* Hero Section */}
         <section className="relative h-[60vh] overflow-hidden">
           <img
-            src={heroImage}
+            src={experienceHero}
             alt="Bharat Darshan Experience"
             className="w-full h-full object-cover"
           />

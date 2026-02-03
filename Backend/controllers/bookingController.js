@@ -95,8 +95,47 @@ const getBookingById = async (req, res) => {
   }
 };
 
+// @desc    Update booking with selected hotels
+// @route   PUT /api/bookings/:id/hotels
+// @access  Private
+const updateBookingHotels = async (req, res) => {
+  try {
+    const { selectedHotels } = req.body;
+    const booking = await Booking.findById(req.params.id);
+
+    if (booking) {
+      if (booking.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+        return res.status(401).json({
+          success: false,
+          error: 'Not authorized to update this booking'
+        });
+      }
+
+      booking.selectedHotels = selectedHotels;
+      const updatedBooking = await booking.save();
+
+      res.json({
+        success: true,
+        booking: updatedBooking,
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Booking not found',
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error',
+    });
+  }
+};
+
 module.exports = {
   createBooking,
   getBookings,
   getBookingById,
+  updateBookingHotels,
 };

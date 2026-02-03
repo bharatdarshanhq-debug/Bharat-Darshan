@@ -32,14 +32,23 @@ const DESTINATION_INFO = {
   }
 };
 
-const DestinationView = ({ destination, packages, allPackages, onBack }) => {
-  // 1. Gather Images for Banner and Gallery
+const DestinationView = ({ destination, packages, allPackages, onBack, stateName = "Odisha", stateSlug = "odisha" }) => {
+  // 1. Gather Images for Banner - prioritize heroImages from packages
+  const heroImagesFromPackages = packages.flatMap(p => p.heroImages || []).filter(Boolean);
   const allImages = packages.flatMap(p => p.images || [p.image]).filter(Boolean);
   const uniqueImages = [...new Set(allImages)];
   
-  // Ensure we have at least a few images for the banner
-  const bannerImages = uniqueImages.slice(0, 5); 
-  const galleryImages = uniqueImages.length > 5 ? uniqueImages : uniqueImages; 
+  // Use heroImages if available, otherwise fallback to first 3 unique images
+  const bannerImages = heroImagesFromPackages.length > 0 
+    ? [...new Set(heroImagesFromPackages)].slice(0, 3)
+    : uniqueImages.slice(0, 3); 
+  
+  // Location image for "About" section - prioritize locationImage from first package
+  const locationImageFromPackage = packages.find(p => p.locationImage)?.locationImage;
+  const aboutSectionImage = locationImageFromPackage || bannerImages[0] || uniqueImages[0];
+  
+  // Gallery images
+  const galleryImages = uniqueImages.length > 3 ? uniqueImages : uniqueImages; 
   
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
@@ -160,7 +169,7 @@ const DestinationView = ({ destination, packages, allPackages, onBack }) => {
              
              {/* Visual element for description side */}
              <div className="w-full md:w-1/2 relative h-[400px] rounded-3xl overflow-hidden shadow-2xl transition-transform duration-500">
-                <img src={bannerImages[1] || bannerImages[0]} alt="About" className="w-full h-full object-cover" />
+                <img src={aboutSectionImage} alt={`About ${destination}`} className="w-full h-full object-cover" />
              </div>
           </div>
         </section>
@@ -200,9 +209,10 @@ const DestinationView = ({ destination, packages, allPackages, onBack }) => {
               })
               .map((pkg, index) => {
                 const isElite = pkg.type === "Elite";
+                const packageId = pkg._id || pkg.id; // Support both MongoDB _id and legacy id
                 return (
                   <motion.div
-                    key={pkg.id}
+                    key={packageId}
                     layout // Add layout prop for smooth reordering animations
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -260,7 +270,7 @@ const DestinationView = ({ destination, packages, allPackages, onBack }) => {
                         ))}
                       </div>
 
-                      <Link to={`/packages/${pkg.id}`} className="block mt-auto">
+                      <Link to={`/packages/${packageId}`} className="block mt-auto">
                         <Button className={`w-full rounded-xl py-6 font-medium text-base transition-all ${
                           isElite 
                             ? "bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-black border-none" 
@@ -308,7 +318,7 @@ const DestinationView = ({ destination, packages, allPackages, onBack }) => {
           <section className="pt-8 border-t border-gray-100">
              <div className="flex items-center justify-between mb-8">
                 <h2 className="font-serif text-2xl md:text-3xl font-bold text-gray-900">Explore More Destinations</h2>
-                <Link to="/packages" onClick={onBack} className="text-primary font-medium hover:underline flex items-center">
+                <Link to={`/packages?state=${stateSlug}`} onClick={onBack} className="text-primary font-medium hover:underline flex items-center">
                    View All <ArrowRight className="w-4 h-4 ml-1" />
                 </Link>
              </div>
@@ -327,7 +337,7 @@ const DestinationView = ({ destination, packages, allPackages, onBack }) => {
                       // Depending on parent usage, we might need a way to navigate. 
                       // Using Link with search param is easiest if we want to stay on Packages page
                     >
-                       <Link to={`/packages?destination=${dest}`}>
+                       <Link to={`/packages?state=${stateSlug}&destination=${dest}`}>
                           <div className="aspect-[4/5] rounded-2xl overflow-hidden relative mb-3 shadow-md">
                              <img src={cover} alt={dest} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />

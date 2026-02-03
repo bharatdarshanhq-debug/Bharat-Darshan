@@ -11,8 +11,8 @@ const app = express();
 app.use(
   cors({
     origin: process.env.FRONTEND_URL 
-      ? [process.env.FRONTEND_URL, 'https://bharat-darshan01.vercel.app', 'https://www.bharat-darshan.com', 'https://bharat-darshan.com', 'http://localhost:5173', 'http://localhost:3000']
-      : ['https://bharat-darshan01.vercel.app', 'https://www.bharat-darshan.com', 'https://bharat-darshan.com', 'http://localhost:5173', 'http://localhost:3000'],
+      ? [process.env.FRONTEND_URL, 'https://bharat-darshan01.vercel.app', 'https://www.bharat-darshan.com', 'https://bharat-darshan.com', 'http://localhost:5173', 'http://localhost:3000', 'http://localhost:8081']
+      : ['https://bharat-darshan01.vercel.app', 'https://www.bharat-darshan.com', 'https://bharat-darshan.com', 'http://localhost:5173', 'http://localhost:3000', 'http://localhost:8081'],
     credentials: true,
   })
 );
@@ -21,6 +21,12 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/contact', require('./routes/contactRoutes'));
+app.use('/api/destinations', require('./routes/destinationRoutes'));
+app.use('/api/packages', require('./routes/packageRoutes'));
+app.use('/api/payments', require('./routes/paymentRoutes'));
+app.use('/api/hotels', require('./routes/hotelRoutes'));
+app.use('/api/states', require('./routes/stateRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 
 app.get('/api/health', (req, res) => {
