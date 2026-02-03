@@ -11,8 +11,8 @@ const app = express();
 app.use(
   cors({
     origin: process.env.FRONTEND_URL 
-      ? [process.env.FRONTEND_URL, 'https://bharat-darshan01.vercel.app', 'https://www.bharat-darshan.com', 'https://bharat-darshan.com', 'http://localhost:5173', 'http://localhost:3000', 'http://localhost:8081']
-      : ['https://bharat-darshan01.vercel.app', 'https://www.bharat-darshan.com', 'https://bharat-darshan.com', 'http://localhost:5173', 'http://localhost:3000', 'http://localhost:8081'],
+      ? [process.env.FRONTEND_URL, 'https://bharat-darshan01.vercel.app', 'https://www.bharat-darshan.com', 'https://bharat-darshan.com', 'https://admin.bharat-darshan.com', 'http://localhost:5173', 'http://localhost:3000', 'http://localhost:8081']
+      : ['https://bharat-darshan01.vercel.app', 'https://www.bharat-darshan.com', 'https://bharat-darshan.com', 'https://admin.bharat-darshan.com', 'http://localhost:5173', 'http://localhost:3000', 'http://localhost:8081'],
     credentials: true,
   })
 );
