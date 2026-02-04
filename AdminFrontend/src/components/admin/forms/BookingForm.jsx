@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { Calendar, Users, IndianRupee, CreditCard, User, Mail, Phone, MapPin } from 'lucide-react';
+import { IndianRupee, User, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/Primitives';
 import { Input } from '@/components/ui/Primitives';
 import { Label } from '@/components/ui/Primitives';
 import { Textarea } from '@/components/ui/Primitives';
-import { Switch } from '@/components/ui/Primitives';
 import {
   Select,
   SelectContent,
@@ -47,7 +46,6 @@ export function BookingForm({ onClose, initialData }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form Submitted:', formData);
     onClose();
   };
 
