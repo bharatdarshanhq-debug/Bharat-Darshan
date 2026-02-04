@@ -8,6 +8,7 @@ import {
   Calendar,
   Users,
   IndianRupee,
+  Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Primitives';
 import { Input } from '@/components/ui/Primitives';
@@ -35,6 +36,7 @@ import {
 } from '@/components/ui/Layout';
 import { mockBookings } from '@/data/mockData';
 import { BookingDetail } from '@/components/admin/BookingDetail';
+import { BookingForm } from '@/components/admin/forms/BookingForm';
 
 const statusColors = {
   pending: 'badge-pending',
@@ -54,6 +56,7 @@ export default function BookingsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
 
   const filteredBookings = mockBookings.filter((booking) => {
     const matchesSearch = 
@@ -76,6 +79,13 @@ export default function BookingsPage() {
           <h1 className="text-3xl font-bold font-display text-foreground">Bookings</h1>
           <p className="text-muted-foreground mt-1">Manage customer bookings</p>
         </div>
+        <Button 
+          className="bg-gradient-primary text-white shadow-lg shadow-primary/20 hover:opacity-90 transition-all"
+          onClick={() => setIsAddBookingOpen(true)}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Booking
+        </Button>
       </motion.div>
 
       {/* Filters */}
@@ -233,6 +243,17 @@ export default function BookingsPage() {
             <DialogDescription>View and manage booking information</DialogDescription>
           </DialogHeader>
           {selectedBooking && <BookingDetail booking={selectedBooking} />}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Add Booking Dialog */}
+      <Dialog open={isAddBookingOpen} onOpenChange={setIsAddBookingOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+           <DialogHeader>
+            <DialogTitle className="font-display text-xl">Create Manual Booking</DialogTitle>
+            <DialogDescription>Enter customer and trip details to create a new booking.</DialogDescription>
+          </DialogHeader>
+          <BookingForm onClose={() => setIsAddBookingOpen(false)} />
         </DialogContent>
       </Dialog>
     </div>
