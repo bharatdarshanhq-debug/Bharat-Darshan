@@ -73,13 +73,13 @@ const Footer = () => {
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                 <span className="text-primary-foreground/80">
-                  Grand Road, Near Jagannath Temple, Puri, Odisha - 752001
+                  Office No: 307, 3rd Floor, Esplanade One Mall, Rasulgarh, Bhubaneswar, Odisha 751010
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-primary flex-shrink-0" />
-                <a href="tel:+917205099129" className="text-primary-foreground/80 hover:text-primary transition-colors">
-                  +91 72050 99129
+                <a href="tel:+919556006338" className="text-primary-foreground/80 hover:text-primary transition-colors">
+                  +91 95560 06338
                 </a>
               </li>
               <li className="flex items-center gap-3">

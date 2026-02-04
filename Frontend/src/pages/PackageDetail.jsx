@@ -282,8 +282,8 @@ const PackageDetail = () => {
                       variant="outline" 
                       className="h-12 rounded-xl border-gray-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                       onClick={() => {
-                        navigator.clipboard.writeText("+917205099129");
-                        toast.success("Number copied! Call our expert at +91 72050 99129");
+                        navigator.clipboard.writeText("+919556006338");
+                        toast.success("Number copied! Call our expert at +91 95560 06338");
                       }}
                     >
                       <Phone className="w-4 h-4 mr-2" /> Call Expert
@@ -291,7 +291,7 @@ const PackageDetail = () => {
                     <Button 
                       variant="outline" 
                       className="h-12 rounded-xl border-gray-200 hover:bg-green-50 hover:text-green-600 hover:border-green-200"
-                      onClick={() => window.open("https://wa.me/917205099129", "_blank")}
+                      onClick={() => window.open("https://wa.me/919556006338", "_blank")}
                     >
                       <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
                     </Button>

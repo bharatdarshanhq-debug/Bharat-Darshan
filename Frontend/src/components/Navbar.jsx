@@ -58,11 +58,11 @@ const Navbar = () => {
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-2">
               <Phone className="w-4 h-4" />
-              +91 72050 99129
+              +91 95560 06338
             </span>
             <span className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
-              Puri, Odisha, India
+              Bhubaneswar, Odisha
             </span>
           </div>
           <div className="flex items-center gap-4">

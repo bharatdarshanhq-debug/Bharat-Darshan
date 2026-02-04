@@ -7,6 +7,7 @@ import {
   Building2,
   CalendarCheck,
   MessageSquare,
+  HelpCircle,
   Settings,
   LogOut,
   ChevronLeft,
@@ -26,6 +27,7 @@ const navItems = [
   { path: '/hotels', label: 'Hotels', icon: Building2 },
   { path: '/bookings', label: 'Bookings', icon: CalendarCheck },
   { path: '/inquiries', label: 'Inquiries', icon: MessageSquare },
+  { path: '/faqs', label: 'FAQs', icon: HelpCircle },
 ];
 
 const bottomNavItems = [

@@ -1,36 +1,9 @@
-﻿import { useState } from "react";
+﻿import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Phone, Mail, MapPin, Clock, MessageCircle, Send, ChevronDown } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, MessageCircle, Send, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/forms";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const faqs = [
-  {
-    question: "How do I book a package?",
-    answer: "You can book directly through our website by clicking 'Book Now' on any package, or contact us via WhatsApp/call. We'll guide you through the process and confirm your booking with a minimal advance payment.",
-  },
-  {
-    question: "What is the cancellation policy?",
-    answer: "Cancellations made 30+ days before travel get 90% refund. 15-30 days: 50% refund. Less than 15 days: No refund, but date change may be possible. Emergency cases are handled individually.",
-  },
-  {
-    question: "Are meals included in packages?",
-    answer: "It depends on the package type. Elite packages include all meals, Pro packages include breakfast, and Premium packages include breakfast. Check individual package details for specifics.",
-  },
-  {
-    question: "Do you provide pickup from airport/station?",
-    answer: "Yes! All our packages include complimentary pickup and drop from Bhubaneswar Airport or Railway Station. For other locations, we can arrange at additional cost.",
-  },
-  {
-    question: "Can I customize a package?",
-    answer: "Absolutely! We specialize in customized tours. Tell us your preferences, dates, budget, and group size â€” we'll create a perfect itinerary just for you.",
-  },
-  {
-    question: "Is it safe to travel to Odisha?",
-    answer: "Odisha is one of the safest states in India for tourists. We ensure verified hotels, trained drivers, and 24/7 support. Solo travelers and families are equally welcome.",
-  },
-];
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -48,9 +21,36 @@ const Contact = () => {
 
   const [status, setStatus] = useState({ loading: false, error: null });
 
+  // FAQ state - fetched from backend
+  const [faqs, setFaqs] = useState([]);
+  const [faqsLoading, setFaqsLoading] = useState(true);
+  
+  // FAQ pagination
+  const FAQS_PER_PAGE = 5;
+  const [faqPage, setFaqPage] = useState(0);
+
   // API URL construction - handles cases where VITE_API_URL includes /api
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const API_URL = API_BASE.includes('/api') ? API_BASE : `${API_BASE.replace(/\/$/, "")}/api`;
+
+  // Fetch FAQs from backend on mount
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      try {
+        const res = await fetch(`${API_URL}/faqs`);
+        const data = await res.json();
+        if (data.success) {
+          setFaqs(data.faqs);
+        }
+      } catch (err) {
+        console.error('[Contact] Error fetching FAQs:', err);
+      } finally {
+        setFaqsLoading(false);
+      }
+    };
+    
+    fetchFaqs();
+  }, [API_URL]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -111,8 +111,8 @@ const Contact = () => {
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-4 gap-6 -mt-20">
               {[
-                { icon: Phone, title: "Call Us", info: "+91 72050 99129", action: "tel:+917205099129" },
-                { icon: MessageCircle, title: "WhatsApp", info: "+91 72050 99129", action: "https://wa.me/917205099129" },
+                { icon: Phone, title: "Call Us", info: "+91 95560 06338", action: "tel:+919556006338" },
+                { icon: MessageCircle, title: "WhatsApp", info: "+91 95560 06338", action: "https://wa.me/919556006338" },
                 { icon: Mail, title: "Email", info: "bharatdarshan.hq@gmail.com", action: "mailto:bharatdarshan.hq@gmail.com" },
                 { icon: Clock, title: "Hours", info: "24/7 Support", action: null },
               ].map((item, index) => (
@@ -186,7 +186,7 @@ const Contact = () => {
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                           className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                          placeholder="+91 72050 99129"
+                          placeholder="+91 95560 06338"
                         />
                       </div>
                     </div>
@@ -347,34 +347,68 @@ const Contact = () => {
             </motion.div>
 
             <div className="max-w-3xl mx-auto space-y-4">
-              {faqs.map((faq, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  className="bg-secondary rounded-xl overflow-hidden"
-                >
-                  <button
-                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                    className="w-full flex items-center justify-between p-5 text-left"
-                  >
-                    <span className="font-medium text-foreground pr-4">{faq.question}</span>
-                    <ChevronDown
-                      className={`w-5 h-5 text-primary flex-shrink-0 transition-transform ${
-                        openFaq === index ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {openFaq === index && (
-                    <div className="px-5 pb-5 text-muted-foreground">
-                      {faq.answer}
-                    </div>
-                  )}
-                </motion.div>
-              ))}
+              {faqs
+                .slice(faqPage * FAQS_PER_PAGE, (faqPage + 1) * FAQS_PER_PAGE)
+                .map((faq, index) => {
+                  const actualIndex = faqPage * FAQS_PER_PAGE + index;
+                  return (
+                    <motion.div
+                      key={faq._id || actualIndex}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.05 }}
+                      className="bg-secondary rounded-xl overflow-hidden"
+                    >
+                      <button
+                        onClick={() => setOpenFaq(openFaq === actualIndex ? null : actualIndex)}
+                        className="w-full flex items-center justify-between p-5 text-left"
+                      >
+                        <span className="font-medium text-foreground pr-4">{faq.question}</span>
+                        <ChevronDown
+                          className={`w-5 h-5 text-primary flex-shrink-0 transition-transform ${
+                            openFaq === actualIndex ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                      {openFaq === actualIndex && (
+                        <div className="px-5 pb-5 text-muted-foreground">
+                          {faq.answer}
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
             </div>
+
+            {/* FAQ Pagination */}
+            {faqs.length > FAQS_PER_PAGE && (
+              <div className="flex items-center justify-center gap-4 mt-8">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFaqPage(prev => Math.max(0, prev - 1))}
+                  disabled={faqPage === 0}
+                  className="gap-1"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page {faqPage + 1} of {Math.ceil(faqs.length / FAQS_PER_PAGE)}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFaqPage(prev => Math.min(Math.ceil(faqs.length / FAQS_PER_PAGE) - 1, prev + 1))}
+                  disabled={faqPage >= Math.ceil(faqs.length / FAQS_PER_PAGE) - 1}
+                  className="gap-1"
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </section>
       </main>

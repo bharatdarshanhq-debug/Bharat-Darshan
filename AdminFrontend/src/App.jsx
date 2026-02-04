@@ -9,6 +9,7 @@ import DestinationsPage from "./pages/DestinationsPage";
 import HotelsPage from "./pages/HotelsPage";
 import BookingsPage from "./pages/BookingsPage";
 import InquiriesPage from "./pages/InquiriesPage";
+import FAQPage from "./pages/FAQPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/hotels/new" element={<HotelsPage />} />
               <Route path="/bookings" element={<BookingsPage />} />
               <Route path="/inquiries" element={<InquiriesPage />} />
+              <Route path="/faqs" element={<FAQPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
           </Route>

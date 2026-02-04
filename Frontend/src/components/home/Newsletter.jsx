@@ -58,7 +58,7 @@ const WhatsAppCTA = () => {
                 className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 px-8 py-6 text-lg w-full sm:w-auto gap-3"
               >
                 <Phone className="w-5 h-5" />
-                +91 72050 99129
+                +91 95560 06338
               </Button>
             </a>
           </div>
