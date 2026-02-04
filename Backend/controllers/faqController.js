@@ -38,7 +38,7 @@ exports.getAllFaqsAdmin = async (req, res) => {
       faqs
     });
   } catch (err) {
-    console.error('[FAQ] Error fetching admin FAQs:', err.message);
+
     res.status(500).json({
       success: false,
       error: 'Server Error: Unable to fetch FAQs'
@@ -67,7 +67,7 @@ exports.getFaqById = async (req, res) => {
       faq
     });
   } catch (err) {
-    console.error('[FAQ] Error fetching FAQ:', err.message);
+
     res.status(500).json({
       success: false,
       error: 'Server Error: Unable to fetch FAQ'
@@ -98,14 +98,14 @@ exports.createFaq = async (req, res) => {
       isActive: isActive !== undefined ? isActive : true
     });
     
-    console.log('[FAQ] Created new FAQ:', faq._id);
+
     
     res.status(201).json({
       success: true,
       faq
     });
   } catch (err) {
-    console.error('[FAQ] Error creating FAQ:', err.message);
+
     
     if (err.name === 'ValidationError') {
       const messages = Object.values(err.errors).map(e => e.message);
@@ -148,14 +148,14 @@ exports.updateFaq = async (req, res) => {
     
     await faq.save();
     
-    console.log('[FAQ] Updated FAQ:', faq._id);
+
     
     res.status(200).json({
       success: true,
       faq
     });
   } catch (err) {
-    console.error('[FAQ] Error updating FAQ:', err.message);
+
     
     if (err.name === 'ValidationError') {
       const messages = Object.values(err.errors).map(e => e.message);
@@ -190,14 +190,14 @@ exports.deleteFaq = async (req, res) => {
     
     await faq.deleteOne();
     
-    console.log('[FAQ] Deleted FAQ:', req.params.id);
+
     
     res.status(200).json({
       success: true,
       message: 'FAQ deleted successfully'
     });
   } catch (err) {
-    console.error('[FAQ] Error deleting FAQ:', err.message);
+
     res.status(500).json({
       success: false,
       error: 'Server Error: Unable to delete FAQ'
@@ -228,7 +228,7 @@ exports.reorderFaqs = async (req, res) => {
     
     await Promise.all(updatePromises);
     
-    console.log('[FAQ] Reordered FAQs');
+
     
     // Return updated list
     const faqs = await Faq.find().sort({ order: 1 });
@@ -238,7 +238,7 @@ exports.reorderFaqs = async (req, res) => {
       faqs
     });
   } catch (err) {
-    console.error('[FAQ] Error reordering FAQs:', err.message);
+
     res.status(500).json({
       success: false,
       error: 'Server Error: Unable to reorder FAQs'
