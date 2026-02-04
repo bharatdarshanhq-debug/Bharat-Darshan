@@ -2,7 +2,7 @@
 // These are exported as constants for reference and documentation purposes
 
 /**
- * @typedef {'Pro' | 'Premium' | 'Elite'} TierType
+ * @typedef {'Lite' | 'Standard' | 'Pro' | 'Premium' | 'Elite'} TierType
  * @typedef {'pending' | 'confirmed' | 'cancelled' | 'completed'} BookingStatus
  * @typedef {'pending' | 'paid' | 'refunded' | 'failed'} PaymentStatus
  * @typedef {'new' | 'contacted' | 'resolved'} InquiryStatus
@@ -112,7 +112,7 @@
  */
 
 // Export tier types as constants
-export const TIER_TYPES = ['Pro', 'Premium', 'Elite'];
+export const TIER_TYPES = ['Lite', 'Standard', 'Pro', 'Premium', 'Elite'];
 export const BOOKING_STATUSES = ['pending', 'confirmed', 'cancelled', 'completed'];
 export const PAYMENT_STATUSES = ['pending', 'paid', 'refunded', 'failed'];
 export const INQUIRY_STATUSES = ['new', 'contacted', 'resolved'];

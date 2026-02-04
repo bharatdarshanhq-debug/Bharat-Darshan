@@ -81,8 +81,53 @@ const PackageDetail = () => {
     );
   }
 
-  const totalPrice = pkg.price * travelers;
-  const savings = (pkg.originalPrice - pkg.price) * travelers;
+  // Helper to format price - handles numbers and text (e.g., "Contact for pricing")
+  const formatPrice = (price) => {
+    if (price == null) return 'Contact for pricing';
+    if (typeof price === 'number') return `₹ ${price.toLocaleString()}`;
+    if (!isNaN(price)) return `₹ ${Number(price).toLocaleString()}`;
+    return price; // Return text as-is (e.g., "Contact for pricing")
+  };
+
+  const isNumericPrice = (price) => {
+    return price != null && !isNaN(price);
+  };
+
+  // Parse group size to get max included travelers (e.g., "1-2" → 2, "2-4" → 4)
+  const parseMaxGroupSize = (groupSize) => {
+    if (!groupSize) return 1;
+    const match = groupSize.match(/(\d+)\s*[-–]\s*(\d+)/); // Match "1-2" or "2 - 4"
+    if (match) return parseInt(match[2], 10);
+    const single = groupSize.match(/(\d+)/);
+    if (single) return parseInt(single[1], 10);
+    return 1;
+  };
+
+  const numericPrice = isNumericPrice(pkg.price) ? Number(pkg.price) : null;
+  const numericOriginalPrice = isNumericPrice(pkg.originalPrice) ? Number(pkg.originalPrice) : null;
+  
+  // Dynamic pricing: flat base price for the group size, +30% per extra traveler
+  const maxIncludedTravelers = parseMaxGroupSize(pkg.groupSize);
+  const calculateTotalPrice = () => {
+    if (!numericPrice) return null;
+    const extraTravelers = Math.max(0, travelers - maxIncludedTravelers);
+    const baseTotal = numericPrice; // Flat rate for the group
+    const extraTotal = extraTravelers * numericPrice * 0.3; // 30% of base price per extra traveler
+    return Math.round(baseTotal + extraTotal);
+  };
+  
+  // Calculate total at original price (same logic but using originalPrice)
+  const calculateOriginalTotal = () => {
+    if (!numericOriginalPrice) return null;
+    const extraTravelers = Math.max(0, travelers - maxIncludedTravelers);
+    const baseTotal = numericOriginalPrice; // Flat rate for the group
+    const extraTotal = extraTravelers * numericOriginalPrice * 0.3; // 30% per extra traveler
+    return Math.round(baseTotal + extraTotal);
+  };
+  
+  const totalPrice = calculateTotalPrice();
+  const totalOriginalPrice = calculateOriginalTotal();
+  const savings = (totalOriginalPrice && totalPrice) ? (totalOriginalPrice - totalPrice) : null;
 
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
@@ -195,12 +240,16 @@ const PackageDetail = () => {
                   <div>
                     <div className="text-sm text-gray-500 mb-1">Starting from</div>
                     <div className="flex items-baseline gap-3">
-                      <span className="text-5xl font-bold text-gray-900">₹ {(pkg.price).toLocaleString()}</span>
-                      <span className="text-lg text-gray-400 line-through">₹ {(pkg.originalPrice).toLocaleString()}</span>
+                      <span className="text-5xl font-bold text-gray-900">{formatPrice(pkg.price)}</span>
+                      {numericOriginalPrice && (
+                        <span className="text-lg text-gray-400 line-through">₹ {numericOriginalPrice.toLocaleString()}</span>
+                      )}
                     </div>
-                    <div className="text-green-600 font-medium text-sm mt-2 flex items-center gap-1">
-                      <Check className="w-4 h-4" /> Save ₹ {(pkg.originalPrice - pkg.price).toLocaleString()} per person
-                    </div>
+                    {savings && savings > 0 && (
+                      <div className="text-green-600 font-medium text-sm mt-2 flex items-center gap-1">
+                        <Check className="w-4 h-4" /> You save ₹ {savings.toLocaleString()}
+                      </div>
+                    )}
                   </div>
                   
                   {/* Travelers Counter */}
@@ -230,7 +279,7 @@ const PackageDetail = () => {
                     className="w-full bg-orange-600 hover:bg-orange-700 text-white rounded-xl h-14 text-lg font-medium shadow-orange-200 shadow-lg"
                     onClick={handleBookNow}
                   >
-                    Request Booking for ₹ {totalPrice.toLocaleString()}
+                    {totalPrice ? `Request Booking for ₹ ${totalPrice.toLocaleString()}` : 'Request Booking'}
                   </Button>
                   <div className="grid grid-cols-2 gap-3">
                      <Button 

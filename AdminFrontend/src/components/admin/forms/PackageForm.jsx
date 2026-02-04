@@ -216,10 +216,9 @@ export function PackageForm({ onClose, initialData }) {
       setError('Please fill all required fields in Core Information');
       return;
     }
-    // Check itinerary has at least one day with a title
-    const hasValidItinerary = itinerary.length > 0 && itinerary.some(day => day.title.trim() !== '');
-    if (!hasValidItinerary || !highlights || !included || !excluded) {
-      setError('Please fill all required fields in Content section (at least one day with a title)');
+    // Check content fields (itinerary is now optional)
+    if (!highlights || !included || !excluded) {
+      setError('Please fill all required fields in Content section (Highlights, Included, Excluded)');
       return;
     }
 
@@ -368,6 +367,8 @@ export function PackageForm({ onClose, initialData }) {
                 <SelectValue placeholder="Select tier" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="Lite">Lite</SelectItem>
+                <SelectItem value="Standard">Standard</SelectItem>
                 <SelectItem value="Pro">Pro</SelectItem>
                 <SelectItem value="Premium">Premium</SelectItem>
                 <SelectItem value="Elite">Elite</SelectItem>
@@ -380,7 +381,7 @@ export function PackageForm({ onClose, initialData }) {
             <Label htmlFor="price">Price (₹) {tier && `for ${tier}`} *</Label>
             <Input 
               id="price" 
-              type="number"
+              type=""
               placeholder={tier ? `Enter ${tier} tier price` : "Select tier first"}
               value={price}
               onChange={(e) => setPrice(e.target.value)}
@@ -435,7 +436,7 @@ export function PackageForm({ onClose, initialData }) {
           {/* Itinerary Builder */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Itinerary *</Label>
+              <Label>Itinerary</Label>
               <Button
                 type="button"
                 variant="outline"

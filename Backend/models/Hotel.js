@@ -19,7 +19,7 @@ const hotelSchema = new mongoose.Schema(
     },
     packageType: [{
       type: String,
-      enum: ['Elite', 'Pro', 'Premium'],
+      enum: ['Lite', 'Standard', 'Elite', 'Pro', 'Premium'],
       required: true,
     }],
     images: [{

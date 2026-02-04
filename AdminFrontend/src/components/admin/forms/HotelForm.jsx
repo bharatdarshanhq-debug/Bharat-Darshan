@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/Interactive';
 import { Separator } from '@/components/ui/Primitives';
 
-const tiers = ['Pro', 'Premium', 'Elite'];
+const tiers = ['Lite', 'Standard', 'Pro', 'Premium', 'Elite'];
 
 export function HotelForm({ onClose, initialData }) {
   const [isActive, setIsActive] = useState(initialData?.isActive ?? true);

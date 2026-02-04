@@ -2,12 +2,16 @@ import { motion } from 'framer-motion';
 import { bookingsByTier } from '@/data/mockData';
 
 const tierColors = {
+  Lite: 'bg-green-500',
+  Standard: 'bg-blue-500',
   Pro: 'bg-info',
   Premium: 'bg-primary',
   Elite: 'bg-accent',
 };
 
 const tierGradients = {
+  Lite: 'from-green-500/20 to-green-500/5',
+  Standard: 'from-blue-500/20 to-blue-500/5',
   Pro: 'from-info/20 to-info/5',
   Premium: 'from-primary/20 to-primary/5',
   Elite: 'from-accent/20 to-accent/5',

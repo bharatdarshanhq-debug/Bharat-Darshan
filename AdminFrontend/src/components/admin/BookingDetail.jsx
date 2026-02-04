@@ -27,6 +27,8 @@ const paymentStatusColors = {
 };
 
 const tierColors = {
+  Lite: 'bg-green-500/15 text-green-600',
+  Standard: 'bg-blue-500/15 text-blue-600',
   Pro: 'bg-info/15 text-info',
   Premium: 'bg-primary/15 text-primary',
   Elite: 'bg-accent/15 text-accent-foreground',

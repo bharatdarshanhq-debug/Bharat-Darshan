@@ -46,6 +46,8 @@ import { PackageForm } from '@/components/admin/forms/PackageForm';
 import { fetchAllPackages, deletePackage } from '@/services/packageService';
 
 const tierColors = {
+  Lite: 'bg-[#22c55e] text-white',
+  Standard: 'bg-[#3b82f6] text-white',
   Pro: 'bg-[#f97316] text-white',
   Premium: 'bg-[#f97316] text-white',
   Elite: 'bg-[#1a1a2e] text-[#f59e0b]',
@@ -222,6 +224,8 @@ export default function PackagesPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Tiers</SelectItem>
+            <SelectItem value="Lite">Lite</SelectItem>
+            <SelectItem value="Standard">Standard</SelectItem>
             <SelectItem value="Pro">Pro</SelectItem>
             <SelectItem value="Premium">Premium</SelectItem>
             <SelectItem value="Elite">Elite</SelectItem>

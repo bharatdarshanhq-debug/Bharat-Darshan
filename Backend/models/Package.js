@@ -37,12 +37,12 @@ const packageSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['Elite', 'Pro', 'Premium'],
+      enum: ['Lite', 'Standard', 'Elite', 'Pro', 'Premium'],
       required: [true, 'Package type is required'],
     },
     variant: {
       type: String,
-      enum: ['elite', 'pro', 'premium'],
+      enum: ['lite', 'standard', 'elite', 'pro', 'premium'],
       lowercase: true,
     },
     duration: {
@@ -54,12 +54,12 @@ const packageSchema = new mongoose.Schema(
       required: true,
     },
     price: {
-      type: Number,
+      type: mongoose.Schema.Types.Mixed, // Can be Number or String (e.g., "Contact for pricing")
       required: [true, 'Price is required'],
     },
     originalPrice: {
-      type: Number,
-      required: true,
+      type: mongoose.Schema.Types.Mixed, // Can be Number or String
+      default: null,
     },
     rating: {
       type: Number,
@@ -103,11 +103,9 @@ const packageSchema = new mongoose.Schema(
     itinerary: [{
       day: {
         type: Number,
-        required: true,
       },
       title: {
         type: String,
-        required: true,
       },
       activities: [{
         type: String,

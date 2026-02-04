@@ -184,7 +184,7 @@ const DestinationView = ({ destination, packages, allPackages, onBack, stateName
             
             {/* Category Tabs */}
             <div className="flex flex-wrap gap-3">
-              {["All", "Premium", "Pro", "Elite"].map((cat) => (
+              {["All", "Lite", "Standard", "Pro", "Premium", "Elite"].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
@@ -204,8 +204,8 @@ const DestinationView = ({ destination, packages, allPackages, onBack, stateName
             {packages
               .filter(pkg => activeCategory === "All" || pkg.type === activeCategory)
               .sort((a, b) => {
-                const order = { "Premium": 1, "Pro": 2, "Elite": 3 };
-                return (order[a.type] || 4) - (order[b.type] || 4);
+                const order = { "Lite": 1, "Standard": 2, "Pro": 3, "Premium": 4, "Elite": 5 };
+                return (order[a.type] || 6) - (order[b.type] || 6);
               })
               .map((pkg, index) => {
                 const isElite = pkg.type === "Elite";
@@ -253,11 +253,16 @@ const DestinationView = ({ destination, packages, allPackages, onBack, stateName
                         </div>
                         <div className="text-right shrink-0">
                           <span className={`block text-2xl font-bold ${isElite ? "text-amber-400" : "text-primary"}`}>
-                            ₹{(pkg.price / 1000).toFixed(1)}k
+                            {typeof pkg.price === 'number' || !isNaN(pkg.price) 
+                              ? `₹${(Number(pkg.price) / 1000).toFixed(1)}k`
+                              : pkg.price || 'Contact'
+                            }
                           </span>
-                          <span className={`text-xs line-through ${isElite ? "text-gray-600" : "text-muted-foreground"}`}>
-                            ₹{(pkg.originalPrice / 1000).toFixed(1)}k
-                          </span>
+                          {pkg.originalPrice && !isNaN(pkg.originalPrice) && (
+                            <span className={`text-xs line-through ${isElite ? "text-gray-600" : "text-muted-foreground"}`}>
+                              ₹{(Number(pkg.originalPrice) / 1000).toFixed(1)}k
+                            </span>
+                          )}
                         </div>
                       </div>
                       
