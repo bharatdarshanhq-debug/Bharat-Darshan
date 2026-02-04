@@ -15,7 +15,7 @@ exports.getAllFaqs = async (req, res) => {
       faqs
     });
   } catch (err) {
-    console.error('[FAQ] Error fetching FAQs:', err.message);
+
     res.status(500).json({
       success: false,
       error: 'Server Error: Unable to fetch FAQs'

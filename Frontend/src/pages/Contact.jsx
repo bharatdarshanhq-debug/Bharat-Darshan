@@ -43,7 +43,7 @@ const Contact = () => {
           setFaqs(data.faqs);
         }
       } catch (err) {
-        console.error('[Contact] Error fetching FAQs:', err);
+
       } finally {
         setFaqsLoading(false);
       }
