@@ -111,18 +111,14 @@ const PackageDetail = () => {
   const calculateTotalPrice = () => {
     if (!numericPrice) return null;
     const extraTravelers = Math.max(0, travelers - maxIncludedTravelers);
-    const baseTotal = numericPrice; // Flat rate for the group
-    const extraTotal = extraTravelers * numericPrice * 0.3; // 30% of base price per extra traveler
-    return Math.round(baseTotal + extraTotal);
+    return Math.round(numericPrice + (extraTravelers * numericPrice * 0.3));
   };
   
   // Calculate total at original price (same logic but using originalPrice)
   const calculateOriginalTotal = () => {
     if (!numericOriginalPrice) return null;
     const extraTravelers = Math.max(0, travelers - maxIncludedTravelers);
-    const baseTotal = numericOriginalPrice; // Flat rate for the group
-    const extraTotal = extraTravelers * numericOriginalPrice * 0.3; // 30% per extra traveler
-    return Math.round(baseTotal + extraTotal);
+    return Math.round(numericOriginalPrice + (extraTravelers * numericOriginalPrice * 0.3));
   };
   
   const totalPrice = calculateTotalPrice();
