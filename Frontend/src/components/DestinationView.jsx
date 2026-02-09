@@ -258,9 +258,9 @@ const DestinationView = ({ destination, packages, allPackages, onBack, stateName
                               : pkg.price || 'Contact'
                             }
                           </span>
-                          {pkg.originalPrice && !isNaN(pkg.originalPrice) && (
+                          {(typeof pkg.price === 'number' || !isNaN(pkg.price)) && (
                             <span className={`text-xs line-through ${isElite ? "text-gray-600" : "text-muted-foreground"}`}>
-                              ₹{(Number(pkg.originalPrice) / 1000).toFixed(1)}k
+                              ₹{(Math.round(Number(pkg.price) / 0.6) / 1000).toFixed(1)}k
                             </span>
                           )}
                         </div>

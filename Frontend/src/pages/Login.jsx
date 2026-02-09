@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Mail, Lock, User, Phone, ArrowRight, LogIn, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/forms";
 import Navbar from "@/components/Navbar";
@@ -14,6 +14,8 @@ const API_URL = API_BASE.includes('/api') ? API_BASE : `${API_BASE.replace(/\/$/
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = location.state?.from || '/';
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -49,7 +51,7 @@ const Login = () => {
         localStorage.setItem("user", JSON.stringify(data.user));
         
         toast.success(isLogin ? "Welcome back!" : "Account created successfully!");
-        navigate("/");
+        navigate(returnTo);
       } else {
         toast.error(data.error || "Something went wrong");
       }

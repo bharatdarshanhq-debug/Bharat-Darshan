@@ -56,10 +56,10 @@ const Navbar = () => {
       <div className="bg-primary text-primary-foreground py-2 px-4 hidden md:block">
         <div className="container mx-auto flex justify-between items-center text-sm">
           <div className="flex items-center gap-6">
-            <span className="flex items-center gap-2">
+            <a href="tel:+919556006338" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <Phone className="w-4 h-4" />
               +91 95560 06338
-            </span>
+            </a>
             <span className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               Bhubaneswar, Odisha

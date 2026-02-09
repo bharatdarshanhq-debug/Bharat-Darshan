@@ -1,20 +1,43 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Users, Phone, MessageSquare, CreditCard, Shield, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/forms';
 import { sonnerToast as toast } from '@/components/ui/feedback';
 import { createBooking, createPaymentOrder, verifyPayment, getRazorpayKey } from '@/services/packageService';
 
-const BookingModal = ({ isOpen, onClose, pkg, user, token }) => {
+const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2 }) => {
+  const navigate = useNavigate();
   const [tripDate, setTripDate] = useState('');
-  const [travelers, setTravelers] = useState(2);
+  const [travelers, setTravelers] = useState(initialTravelers);
   const [contactPhone, setContactPhone] = useState('');
   const [specialRequests, setSpecialRequests] = useState('');
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1); // 1: Details, 2: Review, 3: Payment
 
-  const totalPrice = pkg?.price * travelers;
-  const savings = (pkg?.originalPrice - pkg?.price) * travelers;
+  // Helper to parse group size - duplicated from PackageDetail to ensure consistency
+  const parseMaxGroupSize = (groupSize) => {
+    if (!groupSize) return 1;
+    const match = groupSize.match(/(\d+)\s*[-–]\s*(\d+)/);
+    if (match) return parseInt(match[2], 10);
+    const single = groupSize.match(/(\d+)/);
+    if (single) return parseInt(single[1], 10);
+    return 1;
+  };
+
+  const numericPrice = Number(pkg?.price) || 0;
+  const numericOriginalPrice = (pkg?.originalPrice && !isNaN(pkg.originalPrice)) ? Number(pkg.originalPrice) : 0;
+  const maxIncludedTravelers = parseMaxGroupSize(pkg?.groupSize);
+
+  // Logic: Base price covers up to maxIncludedTravelers. Extra travelers cost 30% of base price.
+  const calculateTotal = (basePrice) => {
+    if (!basePrice) return 0;
+    const extraTravelers = Math.max(0, travelers - maxIncludedTravelers);
+    return Math.round(basePrice + (extraTravelers * basePrice * 0.3));
+  };
+
+  const totalPrice = calculateTotal(numericPrice);
+  const totalOriginalPrice = calculateTotal(numericOriginalPrice);
+  const savings = (totalOriginalPrice > totalPrice) ? (totalOriginalPrice - totalPrice) : 0;
 
   // Get minimum date (tomorrow)
   const getMinDate = () => {
@@ -33,7 +56,9 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token }) => {
       return;
     }
     if (!user || !token) {
-      toast.error('Please login to book this package');
+      toast.info('Please login to book this package');
+      onClose();
+      navigate('/login', { state: { from: `/packages/${pkg._id || pkg.legacyId}` } });
       return;
     }
 
@@ -122,6 +147,10 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token }) => {
       setLoading(false);
     }
   };
+
+  const discountPercentage = (totalOriginalPrice > totalPrice && totalOriginalPrice > 0) 
+    ? Math.round(((totalOriginalPrice - totalPrice) / totalOriginalPrice) * 100) 
+    : 0;
 
   if (!isOpen || !pkg) return null;
 
@@ -250,21 +279,48 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token }) => {
 
             {/* Price Summary */}
             <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">₹{pkg.price.toLocaleString()} × {travelers} travelers</span>
-                <span className="font-medium">₹{totalPrice.toLocaleString()}</span>
-              </div>
-              {savings > 0 && (
-                <div className="flex justify-between text-sm text-green-600">
-                  <span>You save</span>
-                  <span>-₹{savings.toLocaleString()}</span>
+              {/* Original Price - shown with strikethrough when there's a discount */}
+              {totalOriginalPrice > totalPrice && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Original Price (for {maxIncludedTravelers} pax)</span>
+                  <span className="text-gray-400 line-through font-medium">₹{numericOriginalPrice.toLocaleString()}</span>
                 </div>
               )}
+              
+              {/* Discounted/Current Price */}
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">
+                  {totalOriginalPrice > totalPrice ? 'Discounted Price' : 'Base Price'} (for {maxIncludedTravelers} pax)
+                </span>
+                <span className="font-medium text-green-600">₹{numericPrice.toLocaleString()}</span>
+              </div>
+              
+              {/* Extra Travelers charge */}
+              {travelers > maxIncludedTravelers && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Extra Travelers ({travelers - maxIncludedTravelers})</span>
+                  <span className="font-medium">₹{(totalPrice - numericPrice).toLocaleString()}</span>
+                </div>
+              )}
+              
               <div className="h-px bg-gray-200" />
+               
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span className="text-orange-600">₹{totalPrice.toLocaleString()}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-orange-600">₹{totalPrice.toLocaleString()}</span>
+                  {totalOriginalPrice > totalPrice && (
+                    <span className="text-gray-400 line-through text-sm font-normal">
+                      ₹{totalOriginalPrice.toLocaleString()}
+                    </span>
+                  )}
+                </div>
               </div>
+              {savings > 0 && (
+                <div className="flex justify-end text-sm text-green-600 font-medium">
+                  ✓ You save ₹{savings.toLocaleString()} <span className="ml-1 bg-green-100 text-green-700 px-1.5 py-0.5 rounded text-xs"> {discountPercentage}% OFF</span>
+                </div>
+              )}
             </div>
 
             {/* Security Note */}

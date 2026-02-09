@@ -115,6 +115,9 @@ export function PackageForm({ onClose, initialData }) {
       itinerary: data.itinerary?.map(item => 
         typeof item === 'object' ? `Day ${item.day}: ${item.title}` : item
       ) || [],
+      hotelDetails: Array.isArray(data.hotelDetails) ? data.hotelDetails : [],
+      foodPlan: data.foodPlan || '',
+      pickupDrop: data.pickupDrop || '',
     };
   };
 
@@ -126,6 +129,7 @@ export function PackageForm({ onClose, initialData }) {
   const [packageName, setPackageName] = useState(mappedData.name || '');
   const [tier, setTier] = useState(mappedData.tier || '');
   const [price, setPrice] = useState(mappedData.price || '');
+  const [originalPrice, setOriginalPrice] = useState(mappedData.originalPrice || '');
   const [duration, setDuration] = useState(mappedData.duration || '');
   const [groupSize, setGroupSize] = useState(mappedData.groupSize || '');
 
@@ -151,9 +155,18 @@ export function PackageForm({ onClose, initialData }) {
   const [excluded, setExcluded] = useState(
     Array.isArray(mappedData.excluded) ? mappedData.excluded.join(', ') : ''
   );
-  const [hotelDetails, setHotelDetails] = useState(
-    typeof mappedData.hotelDetails === 'string' ? mappedData.hotelDetails : ''
-  );
+  
+  // Hotel Details State - Array of objects
+  const [hotelDetails, setHotelDetails] = useState(() => {
+    if (mappedData.hotelDetails && mappedData.hotelDetails.length > 0) {
+      return mappedData.hotelDetails;
+    }
+    return [{ city: '', hotel: '', nights: '', roomType: '' }];
+  });
+
+  const [foodPlan, setFoodPlan] = useState(mappedData.foodPlan || '');
+  const [transportation, setTransportation] = useState(mappedData.pickupDrop || '');
+  
   const [description, setDescription] = useState(mappedData.description || '');
 
   // Image State - for main package image
@@ -240,6 +253,7 @@ export function PackageForm({ onClose, initialData }) {
       formData.append('specificDestination', specificDestination);
       formData.append('tier', tier);
       formData.append('price', price);
+      if (originalPrice) formData.append('originalPrice', originalPrice);
       formData.append('duration', duration);
       formData.append('groupSize', groupSize);
       // Send itinerary as JSON string with structured data
@@ -252,7 +266,12 @@ export function PackageForm({ onClose, initialData }) {
       formData.append('highlights', highlights);
       formData.append('included', included);
       formData.append('excluded', excluded);
-      formData.append('hotelDetails', hotelDetails);
+      
+      // Send hotel details as JSON string
+      formData.append('hotelDetails', JSON.stringify(hotelDetails));
+      formData.append('foodPlan', foodPlan);
+      formData.append('pickupDrop', transportation);
+      
       formData.append('description', description || `Experience the best of ${specificDestination}`);
       formData.append('isActive', 'true');
 
@@ -376,18 +395,32 @@ export function PackageForm({ onClose, initialData }) {
             </Select>
           </div>
 
-          {/* Price Input */}
-          <div className="space-y-2">
-            <Label htmlFor="price">Price (₹) {tier && `for ${tier}`} *</Label>
-            <Input 
-              id="price" 
-              type=""
-              placeholder={tier ? `Enter ${tier} tier price` : "Select tier first"}
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              disabled={!tier}
-              className={!tier ? 'opacity-50 cursor-not-allowed' : ''}
-            />
+          <div className="grid grid-cols-2 gap-4">
+             {/* Original Price Input */}
+             <div className="space-y-2">
+              <Label htmlFor="originalPrice">Original Price (Optional)</Label>
+              <Input 
+                id="originalPrice" 
+                type="number"
+                placeholder="e.g., 9999"
+                value={originalPrice}
+                onChange={(e) => setOriginalPrice(e.target.value)}
+              />
+            </div>
+
+            {/* Price Input */}
+            <div className="space-y-2">
+              <Label htmlFor="price">Sale Price (₹) {tier && `for ${tier}`} *</Label>
+              <Input 
+                id="price" 
+                type=""
+                placeholder={tier ? `Enter ${tier} price` : "Select tier first"}
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                disabled={!tier}
+                className={!tier ? 'opacity-50 cursor-not-allowed' : ''}
+              />
+            </div>
           </div>
 
           {/* Duration */}
@@ -609,15 +642,113 @@ export function PackageForm({ onClose, initialData }) {
               />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="hotelDetails">Hotel Details</Label>
-            <Textarea 
-              id="hotelDetails" 
-              rows={2} 
-              placeholder="4-star hotels in all cities"
-              value={hotelDetails}
-              onChange={(e) => setHotelDetails(e.target.value)}
-            />
+          {/* Hotel Details Builder */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Where You'll Stay (Hotel Details)</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setHotelDetails(prev => [
+                    ...prev,
+                    { city: '', hotel: '', nights: '', roomType: '' }
+                  ]);
+                }}
+                className="text-xs"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add Hotel
+              </Button>
+            </div>
+            
+            <div className="space-y-3">
+              {hotelDetails.map((hotel, index) => (
+                <div key={index} className="flex flex-col md:flex-row gap-3 items-start border p-3 rounded-lg bg-card">
+                  <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
+                    <Input
+                      placeholder="City (e.g., Puri)"
+                      value={hotel.city}
+                      onChange={(e) => {
+                        const newDetails = [...hotelDetails];
+                        newDetails[index].city = e.target.value;
+                        setHotelDetails(newDetails);
+                      }}
+                      className="h-9 text-sm"
+                    />
+                    <Input
+                      placeholder="Hotel Name"
+                      value={hotel.hotel}
+                      onChange={(e) => {
+                        const newDetails = [...hotelDetails];
+                        newDetails[index].hotel = e.target.value;
+                        setHotelDetails(newDetails);
+                      }}
+                      className="h-9 text-sm"
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Nights"
+                      value={hotel.nights}
+                      onChange={(e) => {
+                        const newDetails = [...hotelDetails];
+                        newDetails[index].nights = e.target.value;
+                        setHotelDetails(newDetails);
+                      }}
+                      className="h-9 text-sm"
+                    />
+                    <Input
+                      placeholder="Room Type"
+                      value={hotel.roomType}
+                      onChange={(e) => {
+                        const newDetails = [...hotelDetails];
+                        newDetails[index].roomType = e.target.value;
+                        setHotelDetails(newDetails);
+                      }}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  {hotelDetails.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setHotelDetails(prev => prev.filter((_, i) => i !== index));
+                      }}
+                      className="text-destructive hover:text-destructive h-9 w-9 p-0 bg-destructive/10 hover:bg-destructive/20"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Separator className="my-2" />
+          
+          <h5 className="font-medium text-sm text-foreground mb-2">Additional Info</h5>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div className="space-y-2">
+              <Label htmlFor="foodPlan">Food Plan</Label>
+              <Input
+                id="foodPlan"
+                placeholder="e.g., Breakfast & Dinner"
+                value={foodPlan}
+                onChange={(e) => setFoodPlan(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="transportation">Transportation</Label>
+              <Input
+                id="transportation"
+                placeholder="e.g., AC Sedan for transfers"
+                value={transportation}
+                onChange={(e) => setTransportation(e.target.value)}
+              />
+            </div>
           </div>
         </div>
       </div>

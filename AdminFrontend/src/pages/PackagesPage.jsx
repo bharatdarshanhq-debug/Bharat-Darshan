@@ -200,7 +200,6 @@ export default function PackagesPage() {
           </Dialog>
         </div>
       </motion.div>
-
       {/* Filters */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

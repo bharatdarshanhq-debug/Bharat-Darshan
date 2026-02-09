@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { sonnerToast as toast } from "@/components/ui/feedback";
 import { motion } from "framer-motion";
 import {
@@ -14,6 +14,7 @@ import { fetchPackageById } from "@/services/packageService";
 
 const PackageDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
   const [expandedDay, setExpandedDay] = useState(1);
   const [travelers, setTravelers] = useState(2);
@@ -21,8 +22,6 @@ const PackageDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
-
-  // Get user from localStorage
   const user = JSON.parse(localStorage.getItem('user') || 'null');
   const token = localStorage.getItem('token');
 
@@ -54,7 +53,9 @@ const PackageDetail = () => {
 
   const handleBookNow = () => {
     if (!user || !token) {
-      toast.error('Please login to book this package');
+      toast.info('Please login to book this package');
+      // Redirect to login page with return URL
+      navigate('/login', { state: { from: `/packages/${id}` } });
       return;
     }
     setShowBookingModal(true);
@@ -123,7 +124,7 @@ const PackageDetail = () => {
   
   const totalPrice = calculateTotalPrice();
   const totalOriginalPrice = calculateOriginalTotal();
-  const savings = (totalOriginalPrice && totalPrice) ? (totalOriginalPrice - totalPrice) : null;
+  const savings = (totalOriginalPrice && totalPrice && totalOriginalPrice > totalPrice) ? (totalOriginalPrice - totalPrice) : null;
 
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
@@ -467,6 +468,7 @@ const PackageDetail = () => {
         pkg={pkg}
         user={user}
         token={token}
+        initialTravelers={travelers}
       />
     </div>
   );

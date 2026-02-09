@@ -22,7 +22,7 @@ export function BookingForm({ onClose, initialData }) {
     customerAddress: '',
     
     // Trip Details
-    tripType: 'package', // package or custom
+    tripType: 'package',
     packageName: '',
     destination: '',
     startDate: '',
@@ -36,7 +36,7 @@ export function BookingForm({ onClose, initialData }) {
     advanceAmount: '',
     paymentMode: 'upi',
     transactionId: '',
-    paymentStatus: 'pending', // pending, paid, partial
+    paymentStatus: 'pending',
     bookingStatus: 'confirmed'
   });
 
@@ -101,7 +101,6 @@ export function BookingForm({ onClose, initialData }) {
           </div>
         </div>
       </div>
-
       <Separator />
 
       {/* Trip Details */}
@@ -209,7 +208,6 @@ export function BookingForm({ onClose, initialData }) {
           />
         </div>
       </div>
-
       <Separator />
 
       {/* Payment & Advance */}
@@ -218,7 +216,6 @@ export function BookingForm({ onClose, initialData }) {
           <IndianRupee className="h-5 w-5 text-primary" />
           <h4 className="font-semibold text-foreground">Payment & Advance</h4>
         </div>
-        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="totalAmount">Total Booking Amount (₹)</Label>
@@ -231,7 +228,6 @@ export function BookingForm({ onClose, initialData }) {
               className="font-semibold"
             />
           </div>
-          
            <div className="space-y-2">
             <Label htmlFor="advanceAmount" className="text-primary font-medium">Advance Paid (₹)</Label>
             <Input 

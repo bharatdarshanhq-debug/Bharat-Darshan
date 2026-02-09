@@ -77,7 +77,6 @@ export function DestinationForm({ onClose, initialData, onSuccess }) {
       if (heroImage) {
         formData.append('heroImage', heroImage);
       } else if (initialData?.image && !heroImage) {
-        // Keep existing image for updates
         formData.append('image', initialData.image);
       }
 

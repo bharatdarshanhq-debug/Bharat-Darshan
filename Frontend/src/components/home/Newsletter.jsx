@@ -50,7 +50,7 @@ const WhatsAppCTA = () => {
             </a>
             
             <a 
-              href="tel:+917205099129"
+              href="tel:+919556006338"
               className="w-full sm:w-auto"
             >
               <Button

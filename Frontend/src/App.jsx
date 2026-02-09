@@ -15,6 +15,9 @@ import Bookings from "./pages/Bookings";
 import BookingDetail from "./pages/BookingDetail";
 import HotelSelection from './pages/HotelSelection'; // Added import
 import BookingSuccess from "./pages/BookingSuccess";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import RefundPolicy from "./pages/RefundPolicy";
 
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -40,6 +43,9 @@ const App = () => (
           <Route path="/bookings/:id" element={<BookingDetail />} />
           <Route path="/bookings/:bookingId/select-hotels" element={<HotelSelection />} />
           <Route path="/booking-success" element={<BookingSuccess />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/refund" element={<RefundPolicy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
