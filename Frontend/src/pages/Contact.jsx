@@ -76,7 +76,6 @@ const Contact = () => {
       setFormData({ name: "", email: "", phone: "", message: "", package: "" });
       setTimeout(() => setSubmitted(false), 5000);
     } catch (err) {
-      console.error('[Contact] Error:', err);
       setStatus({ loading: false, error: err.message });
     } finally {
       setStatus(prev => ({ ...prev, loading: false }));

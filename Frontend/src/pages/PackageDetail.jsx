@@ -3,8 +3,8 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { sonnerToast as toast } from "@/components/ui/feedback";
 import { motion } from "framer-motion";
 import {
-  Star, Clock, Users, MapPin, Check, X, ChevronDown, ChevronUp,
-  Phone, MessageCircle, Calendar, Utensils, Hotel, Car, Shield, ArrowLeft, Loader2
+  Star, Clock, Users, Check, X, ChevronDown, ChevronUp,
+  Phone, MessageCircle, Calendar, Utensils, Hotel, Car, Shield, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/forms";
 import Navbar from "@/components/Navbar";
@@ -41,7 +41,6 @@ const PackageDetail = () => {
         }
         setPkg(packageData);
       } catch (err) {
-        console.error('Failed to load package:', err.message);
         setError('Package not found or server error');
         setPkg(null);
       } finally {

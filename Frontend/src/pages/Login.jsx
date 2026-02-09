@@ -56,7 +56,6 @@ const Login = () => {
         toast.error(data.error || "Something went wrong");
       }
     } catch (error) {
-      console.error("Auth error:", error);
       toast.error("Unable to connect to server. Please try again.");
     } finally {
       setIsLoading(false);
