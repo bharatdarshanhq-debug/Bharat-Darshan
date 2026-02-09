@@ -192,7 +192,7 @@ const Experiences = () => {
               </h2>
             </motion.div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
               {experiences.map((exp, index) => (
                 <motion.div
                   key={index}

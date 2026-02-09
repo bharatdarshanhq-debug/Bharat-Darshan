@@ -197,7 +197,7 @@ const Packages = () => {
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true }}
                           transition={{ delay: index * 0.1 }}
-                          className="group relative h-[450px] w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(33.33%-1.5rem)] xl:w-[calc(25%-1.5rem)] rounded-3xl overflow-hidden cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500"
+                          className="group relative h-[350px] sm:h-[400px] lg:h-[450px] w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.33%-1rem)] rounded-3xl overflow-hidden cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500"
                           onClick={() => handleDestinationClick(dest)}
                         >
                           <img 
@@ -267,7 +267,7 @@ const Packages = () => {
                   <p className="text-gray-600 mt-4">Choose a state to explore our handcrafted travel packages</p>
                 </div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {/* Render all states - show as active if they have packages */}
                   {states.map((state, index) => {
                     const stateDestinations = getDestinationsForState(state.name);

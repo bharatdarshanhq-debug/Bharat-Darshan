@@ -194,7 +194,7 @@ const HotelSelection = () => {
           Choose your preferred accommodation from {hotels.length} available option{hotels.length > 1 ? 's' : ''}
         </motion.p>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {hotels.map((hotel, index) => (
             <motion.div 
               key={hotel._id}

@@ -151,7 +151,7 @@ const PackageDetail = () => {
 
         {/* Hero Section */}
         <section className="container mx-auto px-4 mb-12">
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             {/* Image Gallery */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -161,7 +161,7 @@ const PackageDetail = () => {
                 <img
                   src={pkg.images[selectedImage]}
                   alt={pkg.name}
-                  className="w-full h-80 md:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="w-full h-64 sm:h-80 md:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
               </div>
@@ -205,7 +205,7 @@ const PackageDetail = () => {
                 {pkg.name}
               </h1>
 
-              <div className="grid grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
                 <div className="flex items-center gap-3 p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
                   <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
                     <Clock className="w-5 h-5 text-orange-600" />
@@ -236,7 +236,7 @@ const PackageDetail = () => {
                   <div>
                     <div className="text-sm text-gray-500 mb-1">Starting from</div>
                     <div className="flex items-baseline gap-3">
-                      <span className="text-5xl font-bold text-gray-900">{formatPrice(pkg.price)}</span>
+                      <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">{formatPrice(pkg.price)}</span>
                       {numericOriginalPrice && (
                         <span className="text-lg text-gray-400 line-through">₹ {numericOriginalPrice.toLocaleString()}</span>
                       )}
@@ -305,9 +305,9 @@ const PackageDetail = () => {
         {/* Content Tabs Section */}
         <section className="bg-white py-20 border-t border-gray-100">
            <div className="container mx-auto px-4">
-              <div className="grid lg:grid-cols-3 gap-12">
+              <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
                  {/* Main Content */}
-                 <div className="lg:col-span-2 space-y-12">
+                 <div className="md:col-span-2 space-y-12">
                     
                     {/* Itinerary */}
                     <div>
@@ -348,7 +348,7 @@ const PackageDetail = () => {
                               </div>
                             </button>
                             {expandedDay === day.day && (
-                              <div className="px-6 pb-6 pl-20 border-t border-orange-100/50 pt-4">
+                              <div className="px-4 sm:px-6 pb-6 sm:pl-20 border-t border-orange-100/50 pt-4">
                                 <ul className="space-y-3">
                                   {day.activities.map((activity, i) => (
                                     <li key={i} className="flex items-start gap-3 text-gray-600">

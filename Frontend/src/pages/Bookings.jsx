@@ -89,7 +89,7 @@ const Bookings = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex justify-between items-end mb-8"
+              className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8"
             >
               <div>
                 <h1 className="text-3xl md:text-4xl font-serif font-bold mb-2">My Bookings</h1>
