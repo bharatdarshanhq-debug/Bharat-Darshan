@@ -201,7 +201,7 @@ const PackageDetail = () => {
                 </div>
               </div>
 
-              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
                 {pkg.name}
               </h1>
 
@@ -231,7 +231,7 @@ const PackageDetail = () => {
               </p>
 
               {/* Price Card */}
-              <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl border border-gray-100">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
                   <div>
                     <div className="text-sm text-gray-500 mb-1">Starting from</div>
@@ -272,7 +272,7 @@ const PackageDetail = () => {
                 <div className="flex flex-col gap-3">
                    <Button 
                     size="xl" 
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white rounded-xl h-14 text-lg font-medium shadow-orange-200 shadow-lg"
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white rounded-xl h-12 sm:h-14 text-base sm:text-lg font-medium shadow-orange-200 shadow-lg"
                     onClick={handleBookNow}
                   >
                     {totalPrice ? `Request Booking for ₹ ${totalPrice.toLocaleString()}` : 'Request Booking'}
@@ -286,14 +286,14 @@ const PackageDetail = () => {
                         toast.success("Number copied! Call our expert at +91 95560 06338");
                       }}
                     >
-                      <Phone className="w-4 h-4 mr-2" /> Call Expert
+                      <Phone className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Call Expert</span><span className="sm:hidden">Call</span>
                     </Button>
                     <Button 
                       variant="outline" 
                       className="h-12 rounded-xl border-gray-200 hover:bg-green-50 hover:text-green-600 hover:border-green-200"
                       onClick={() => window.open("https://wa.me/919556006338", "_blank")}
                     >
-                      <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
+                      <MessageCircle className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">WhatsApp</span><span className="sm:hidden">Chat</span>
                     </Button>
                   </div>
                 </div>
@@ -389,7 +389,7 @@ const PackageDetail = () => {
 
                  {/* Sidebar Info */}
                  <div className="space-y-8">
-                     <div className="bg-gray-900 text-white rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                     <div className="bg-gray-900 text-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/20 rounded-full translate-x-10 -translate-y-10 blur-3xl" />
                         
                         <h3 className="font-serif text-2xl font-bold mb-6 relative z-10">Package Inclusions</h3>
@@ -415,7 +415,7 @@ const PackageDetail = () => {
                         </ul>
                      </div>
 
-                     <div className="bg-orange-50 rounded-3xl p-8 border border-orange-100">
+                     <div className="bg-orange-50 rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-orange-100">
                         <h3 className="font-serif text-xl font-bold text-gray-900 mb-4">Additional Info</h3>
                         <div className="space-y-6">
                            <div>
