@@ -44,7 +44,7 @@ const Contact = () => {
           setFaqs(data.faqs);
         }
       } catch {
-
+        // Ignore faqs fetch error
       } finally {
         setFaqsLoading(false);
       }
@@ -63,7 +63,7 @@ const Contact = () => {
           setPackages(data.packages);
         }
       } catch {
-        // Silently fail — dropdown will be empty
+        // Silently fail — dropdown will be empty. Ignore packages fetch error.
       }
     };
     

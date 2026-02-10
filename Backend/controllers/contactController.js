@@ -77,8 +77,7 @@ exports.submitContactForm = async (req, res) => {
       .catch(err => console.error('[Email] Background error:', err.message));
 
   } catch (err) {
-    console.error('[Contact] Error:', err.message);
-    console.error('[Contact] Stack:', err.stack);
+    // console.error('[Contact] Error:', err.message);
     res.status(500).json({
       success: false,
       error: 'Server Error: Unable to submit form'
@@ -107,7 +106,7 @@ exports.getAllInquiries = async (req, res) => {
       inquiries,
     });
   } catch (err) {
-    console.error('[Contact] getAllInquiries error:', err.message);
+    // console.error('[Contact] getAllInquiries error:', err.message);
     res.status(500).json({ success: false, error: 'Failed to fetch inquiries' });
   }
 };
@@ -124,7 +123,7 @@ exports.getInquiryById = async (req, res) => {
     }
     res.json({ success: true, inquiry });
   } catch (err) {
-    console.error('[Contact] getInquiryById error:', err.message);
+    // console.error('[Contact] getInquiryById error:', err.message);
     res.status(500).json({ success: false, error: 'Failed to fetch inquiry' });
   }
 };
@@ -156,7 +155,7 @@ exports.updateInquiryStatus = async (req, res) => {
 
     res.json({ success: true, inquiry });
   } catch (err) {
-    console.error('[Contact] updateInquiryStatus error:', err.message);
+    // console.error('[Contact] updateInquiryStatus error:', err.message);
     res.status(500).json({ success: false, error: 'Failed to update inquiry status' });
   }
 };
@@ -173,7 +172,7 @@ exports.deleteInquiry = async (req, res) => {
     }
     res.json({ success: true, message: 'Inquiry deleted successfully' });
   } catch (err) {
-    console.error('[Contact] deleteInquiry error:', err.message);
+    // console.error('[Contact] deleteInquiry error:', err.message);
     res.status(500).json({ success: false, error: 'Failed to delete inquiry' });
   }
 };
