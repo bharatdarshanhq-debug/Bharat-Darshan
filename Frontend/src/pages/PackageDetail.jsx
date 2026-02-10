@@ -255,11 +255,11 @@ const PackageDetail = () => {
 
               {/* Price Card */}
               <div className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-6 md:p-8 shadow-lg sm:shadow-xl border border-gray-100">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-4 sm:mb-8">
                   <div>
                     <div className="text-sm text-gray-500 mb-1">Starting from</div>
                     <div className="flex items-baseline gap-3">
-                      <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">{formatPrice(pkg.price)}</span>
+                      <span className="text-2xl sm:text-4xl md:text-5xl font-bold text-gray-900">{formatPrice(pkg.price)}</span>
                       {numericOriginalPrice && (
                         <span className="text-lg text-gray-400 line-through">₹ {numericOriginalPrice.toLocaleString()}</span>
                       )}
@@ -298,7 +298,12 @@ const PackageDetail = () => {
                     className="w-full bg-orange-600 hover:bg-orange-700 text-white rounded-xl h-11 sm:h-14 text-base sm:text-lg font-medium shadow-orange-200 shadow-lg"
                     onClick={handleBookNow}
                   >
-                    {totalPrice ? `Request Booking for ₹ ${totalPrice.toLocaleString()}` : 'Request Booking'}
+                    {totalPrice ? (
+                      <>
+                        <span className="sm:hidden">Book for ₹ {totalPrice.toLocaleString()}</span>
+                        <span className="hidden sm:inline">Request Booking for ₹ {totalPrice.toLocaleString()}</span>
+                      </>
+                    ) : 'Request Booking'}
                   </Button>
                   <div className="grid grid-cols-2 gap-3">
                      <Button 
