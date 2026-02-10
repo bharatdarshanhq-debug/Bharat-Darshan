@@ -177,8 +177,8 @@ const PackageDetail = () => {
           <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             {/* Image Gallery */}
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
             >
               <div className="rounded-3xl overflow-hidden mb-4 shadow-2xl relative group">
                 <img
@@ -205,8 +205,8 @@ const PackageDetail = () => {
 
             {/* Package Info */}
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
               className="flex flex-col justify-center"
             >
               <div className="flex items-center gap-3 mb-6">
@@ -254,7 +254,7 @@ const PackageDetail = () => {
               </p>
 
               {/* Price Card */}
-              <div className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-6 md:p-8 shadow-xl border border-gray-100">
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-6 md:p-8 shadow-lg sm:shadow-xl border border-gray-100">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
                   <div>
                     <div className="text-sm text-gray-500 mb-1">Starting from</div>
