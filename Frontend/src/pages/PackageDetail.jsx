@@ -272,20 +272,20 @@ const PackageDetail = () => {
                   </div>
                   
                   {/* Travelers Counter */}
-                   <div className="flex items-center gap-3 bg-gray-50 p-2 rounded-xl w-fit">
+                   <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl w-fit">
                       <button
                         onClick={() => setTravelers(Math.max(1, travelers - 1))}
-                        className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                        className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center hover:bg-orange-50 hover:text-orange-600 transition-colors"
                       >
                         -
                       </button>
-                      <div className="text-center min-w-[3rem]">
-                        <div className="text-xs text-gray-400 uppercase font-bold">Guests</div>
-                        <div className="font-bold text-gray-900 text-lg">{travelers}</div>
+                      <div className="text-center min-w-[2.5rem]">
+                        <div className="text-[10px] text-gray-400 uppercase font-bold">Guests</div>
+                        <div className="font-bold text-gray-900 text-base">{travelers}</div>
                       </div>
                       <button
                         onClick={() => setTravelers(travelers + 1)}
-                        className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                        className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center hover:bg-orange-50 hover:text-orange-600 transition-colors"
                       >
                         +
                       </button>
