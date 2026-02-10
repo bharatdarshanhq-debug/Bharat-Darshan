@@ -43,7 +43,7 @@ const Contact = () => {
         if (data.success) {
           setFaqs(data.faqs);
         }
-      } catch (err) {
+      } catch {
 
       } finally {
         setFaqsLoading(false);
@@ -62,7 +62,7 @@ const Contact = () => {
         if (data.success) {
           setPackages(data.packages);
         }
-      } catch (err) {
+      } catch {
         // Silently fail — dropdown will be empty
       }
     };

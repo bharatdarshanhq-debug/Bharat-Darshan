@@ -5,8 +5,6 @@ const sendEmailNotification = async (contactData) => {
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   
   if (!RESEND_API_KEY) {
-    console.log('[Email] RESEND_API_KEY not configured, skipping email notification');
-    console.log('[Email] Get your free API key at: https://resend.com');
     return;
   }
 
@@ -42,7 +40,7 @@ const sendEmailNotification = async (contactData) => {
     const data = await response.json();
     
     if (response.ok) {
-      console.log('[Email] Sent successfully via Resend! ID:', data.id);
+      // Email sent successfully
     } else {
       console.error('[Email] Resend API error:', data.message || JSON.stringify(data));
     }
@@ -55,8 +53,6 @@ exports.submitContactForm = async (req, res) => {
   try {
     const { name, email, phone, message, package: packageType, destination } = req.body;
 
-    console.log('[Contact] Received form submission:', { name, email, phone, packageType, destination });
-
     // Save to database first
     const contact = await Contact.create({
       name,
@@ -67,7 +63,7 @@ exports.submitContactForm = async (req, res) => {
       destination
     });
 
-    console.log('[Contact] Saved to database successfully:', contact._id);
+
 
     // Send response IMMEDIATELY after DB save
     res.status(201).json({
