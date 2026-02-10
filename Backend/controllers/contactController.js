@@ -90,3 +90,96 @@ exports.submitContactForm = async (req, res) => {
   }
 };
 
+// ─── Admin Endpoints ───────────────────────────────────────────
+
+/**
+ * GET /api/contact/admin/all
+ * Fetch all inquiries (admin). Supports ?status=New filter.
+ */
+exports.getAllInquiries = async (req, res) => {
+  try {
+    const filter = {};
+    if (req.query.status && req.query.status !== 'all') {
+      filter.status = req.query.status;
+    }
+
+    const inquiries = await Contact.find(filter).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: inquiries.length,
+      inquiries,
+    });
+  } catch (err) {
+    console.error('[Contact] getAllInquiries error:', err.message);
+    res.status(500).json({ success: false, error: 'Failed to fetch inquiries' });
+  }
+};
+
+/**
+ * GET /api/contact/admin/:id
+ * Fetch a single inquiry by ID (admin).
+ */
+exports.getInquiryById = async (req, res) => {
+  try {
+    const inquiry = await Contact.findById(req.params.id);
+    if (!inquiry) {
+      return res.status(404).json({ success: false, error: 'Inquiry not found' });
+    }
+    res.json({ success: true, inquiry });
+  } catch (err) {
+    console.error('[Contact] getInquiryById error:', err.message);
+    res.status(500).json({ success: false, error: 'Failed to fetch inquiry' });
+  }
+};
+
+/**
+ * PUT /api/contact/admin/:id/status
+ * Update inquiry status (admin). Body: { status: 'New' | 'Contacted' | 'Resolved' }
+ */
+exports.updateInquiryStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const allowed = ['New', 'Contacted', 'Resolved'];
+    if (!status || !allowed.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: `Invalid status. Must be one of: ${allowed.join(', ')}`,
+      });
+    }
+
+    const inquiry = await Contact.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: true }
+    );
+
+    if (!inquiry) {
+      return res.status(404).json({ success: false, error: 'Inquiry not found' });
+    }
+
+    res.json({ success: true, inquiry });
+  } catch (err) {
+    console.error('[Contact] updateInquiryStatus error:', err.message);
+    res.status(500).json({ success: false, error: 'Failed to update inquiry status' });
+  }
+};
+
+/**
+ * DELETE /api/contact/admin/:id
+ * Delete an inquiry (admin).
+ */
+exports.deleteInquiry = async (req, res) => {
+  try {
+    const inquiry = await Contact.findByIdAndDelete(req.params.id);
+    if (!inquiry) {
+      return res.status(404).json({ success: false, error: 'Inquiry not found' });
+    }
+    res.json({ success: true, message: 'Inquiry deleted successfully' });
+  } catch (err) {
+    console.error('[Contact] deleteInquiry error:', err.message);
+    res.status(500).json({ success: false, error: 'Failed to delete inquiry' });
+  }
+};
+
+

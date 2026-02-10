@@ -15,6 +15,7 @@ const Contact = () => {
     destination: "",
   });
 
+  const [packages, setPackages] = useState([]);
   const destinations = ["Puri", "Bhubaneswar", "Chilika", "Konark"];
   const [submitted, setSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState(0);
@@ -50,6 +51,23 @@ const Contact = () => {
     };
     
     fetchFaqs();
+  }, [API_URL]);
+
+  // Fetch packages from backend on mount
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const res = await fetch(`${API_URL}/packages`);
+        const data = await res.json();
+        if (data.success) {
+          setPackages(data.packages);
+        }
+      } catch (err) {
+        // Silently fail — dropdown will be empty
+      }
+    };
+    
+    fetchPackages();
   }, [API_URL]);
 
   const handleSubmit = async (e) => {
@@ -215,9 +233,17 @@ const Contact = () => {
                           className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         >
                           <option value="">Select a package</option>
-                          <option value="Premium">Premium</option>
-                          <option value="Pro">Pro</option>
-                          <option value="Elite">Elite</option>
+                          {(() => {
+                            const tierOrder = ['lite', 'standard', 'pro', 'premium', 'elite'];
+                            const uniqueTiers = [...new Set(packages.map((pkg) => pkg.variant).filter(Boolean))];
+                            return uniqueTiers
+                              .sort((a, b) => tierOrder.indexOf(a) - tierOrder.indexOf(b))
+                              .map((v) => (
+                                <option key={v} value={v.charAt(0).toUpperCase() + v.slice(1)}>
+                                  {v.charAt(0).toUpperCase() + v.slice(1)}
+                                </option>
+                              ));
+                          })()}
                         </select>
                       </div>
 

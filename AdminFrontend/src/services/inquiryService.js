@@ -1,0 +1,114 @@
+/**
+ * Inquiry API Service for Admin Frontend
+ * Handles all inquiry operations with the backend API
+ */
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+/**
+ * Get admin token from localStorage
+ */
+const getAdminToken = () => {
+  return localStorage.getItem('adminToken');
+};
+
+/**
+ * Fetch all inquiries (optionally filter by status)
+ * @param {string} [status] - Optional status filter: 'New', 'Contacted', 'Resolved'
+ */
+export const fetchAllInquiries = async (status) => {
+  const token = getAdminToken();
+  const query = status && status !== 'all' ? `?status=${status}` : '';
+
+  const response = await fetch(`${API_URL}/contact/admin/all${query}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to fetch inquiries');
+  }
+
+  return data.inquiries;
+};
+
+/**
+ * Fetch a single inquiry by ID
+ * @param {string} id - Inquiry ID
+ */
+export const fetchInquiryById = async (id) => {
+  const token = getAdminToken();
+
+  const response = await fetch(`${API_URL}/contact/admin/${id}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to fetch inquiry');
+  }
+
+  return data.inquiry;
+};
+
+/**
+ * Update inquiry status
+ * @param {string} id - Inquiry ID
+ * @param {string} status - New status: 'New' | 'Contacted' | 'Resolved'
+ */
+export const updateInquiryStatus = async (id, status) => {
+  const token = getAdminToken();
+
+  const response = await fetch(`${API_URL}/contact/admin/${id}/status`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ status }),
+  });
+
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to update inquiry status');
+  }
+
+  return data.inquiry;
+};
+
+/**
+ * Delete an inquiry
+ * @param {string} id - Inquiry ID
+ */
+export const deleteInquiry = async (id) => {
+  const token = getAdminToken();
+
+  const response = await fetch(`${API_URL}/contact/admin/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to delete inquiry');
+  }
+
+  return data;
+};
+
+export default {
+  fetchAllInquiries,
+  fetchInquiryById,
+  updateInquiryStatus,
+  deleteInquiry,
+};

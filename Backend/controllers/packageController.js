@@ -277,34 +277,32 @@ const createPackage = async (req, res) => {
         return data;
       }
       
-      // If it's a plain string (like "4 Star Hotel"), create a default entry
-      if (typeof data === 'string' && data.trim()) {
-        return [{
-          city: 'Default',
-          hotel: data.trim(),
-          nights: 1,
-          roomType: 'Standard Room',
-        }];
-      }
-      
-      // If it's a JSON array or object, try to parse it
+      // If it's a string, try JSON parse FIRST before treating as plain text
       if (typeof data === 'string') {
+        const trimmed = data.trim();
+        if (!trimmed) return [];
+        
+        // Try to parse as JSON first (admin form sends JSON.stringify)
         try {
-          const parsed = JSON.parse(data);
+          const parsed = JSON.parse(trimmed);
           if (Array.isArray(parsed)) {
             return parsed;
           }
-        } catch {
-          // Not JSON, treat as plain text
-          if (data.trim()) {
-            return [{
-              city: 'Default',
-              hotel: data.trim(),
-              nights: 1,
-              roomType: 'Standard Room',
-            }];
+          // If parsed to a single object, wrap in array
+          if (typeof parsed === 'object' && parsed !== null) {
+            return [parsed];
           }
+        } catch {
+          // Not JSON - treat as a plain text hotel name (e.g. "4 Star Hotel")
         }
+        
+        // Plain string fallback - create a default entry
+        return [{
+          city: 'Default',
+          hotel: trimmed,
+          nights: 1,
+          roomType: 'Standard Room',
+        }];
       }
       
       return [];
@@ -440,34 +438,32 @@ const updatePackage = async (req, res) => {
         return data;
       }
       
-      // If it's a plain string (like "4 Star Hotel"), create a default entry
-      if (typeof data === 'string' && data.trim()) {
-        return [{
-          city: 'Default',
-          hotel: data.trim(),
-          nights: 1,
-          roomType: 'Standard Room',
-        }];
-      }
-      
-      // If it's a JSON array or object, try to parse it
+      // If it's a string, try JSON parse FIRST before treating as plain text
       if (typeof data === 'string') {
+        const trimmed = data.trim();
+        if (!trimmed) return undefined;
+        
+        // Try to parse as JSON first (admin form sends JSON.stringify)
         try {
-          const parsed = JSON.parse(data);
+          const parsed = JSON.parse(trimmed);
           if (Array.isArray(parsed)) {
             return parsed;
           }
-        } catch {
-          // Not JSON, treat as plain text
-          if (data.trim()) {
-            return [{
-              city: 'Default',
-              hotel: data.trim(),
-              nights: 1,
-              roomType: 'Standard Room',
-            }];
+          // If parsed to a single object, wrap in array
+          if (typeof parsed === 'object' && parsed !== null) {
+            return [parsed];
           }
+        } catch {
+          // Not JSON - treat as a plain text hotel name (e.g. "4 Star Hotel")
         }
+        
+        // Plain string fallback - create a default entry
+        return [{
+          city: 'Default',
+          hotel: trimmed,
+          nights: 1,
+          roomType: 'Standard Room',
+        }];
       }
       
       return undefined;

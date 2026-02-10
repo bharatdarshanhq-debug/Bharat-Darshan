@@ -32,12 +32,35 @@ const PackageDetail = () => {
       try {
         // Fetch from API
         const packageData = await fetchPackageById(id);
-        // Map roomType back to type for hotelDetails display
-        if (packageData.hotelDetails) {
-          packageData.hotelDetails = packageData.hotelDetails.map(h => ({
-            ...h,
-            type: h.roomType || h.type
-          }));
+        // Parse hotelDetails if it arrives as a JSON string
+        if (packageData.hotelDetails && typeof packageData.hotelDetails === 'string') {
+          try {
+            packageData.hotelDetails = JSON.parse(packageData.hotelDetails);
+          } catch {
+            packageData.hotelDetails = [];
+          }
+        }
+        // Map roomType back to type for hotelDetails display, and fix corrupted hotel names
+        if (Array.isArray(packageData.hotelDetails)) {
+          packageData.hotelDetails = packageData.hotelDetails.map(h => {
+            let hotelName = h.hotel;
+            // Fix corrupted data: if hotel field contains a JSON string, extract the real name
+            if (typeof hotelName === 'string' && hotelName.trim().startsWith('[')) {
+              try {
+                const parsed = JSON.parse(hotelName);
+                if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].hotel) {
+                  hotelName = parsed[0].hotel;
+                }
+              } catch {
+                // keep original
+              }
+            }
+            return {
+              ...h,
+              hotel: hotelName,
+              type: h.roomType || h.type
+            };
+          });
         }
         setPkg(packageData);
       } catch (err) {
@@ -282,8 +305,7 @@ const PackageDetail = () => {
                       variant="outline" 
                       className="h-12 rounded-xl border-gray-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                       onClick={() => {
-                        navigator.clipboard.writeText("+919556006338");
-                        toast.success("Number copied! Call our expert at +91 95560 06338");
+                        window.location.href = "tel:+919556006338";
                       }}
                     >
                       <Phone className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Call Expert</span><span className="sm:hidden">Call</span>
