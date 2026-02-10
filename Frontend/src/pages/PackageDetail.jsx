@@ -152,7 +152,7 @@ const PackageDetail = () => {
     <div className="min-h-screen bg-[#FAF9F6]">
       <Navbar />
 
-      <main className="pt-24 md:pt-32">
+      <main className="pt-24 md:pt-32 overflow-x-hidden">
         {/* Breadcrumb */}
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
@@ -173,7 +173,7 @@ const PackageDetail = () => {
         </div>
 
         {/* Hero Section */}
-        <section className="container mx-auto px-4 mb-12">
+        <section className="container mx-auto px-4 mb-8 sm:mb-12">
           <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             {/* Image Gallery */}
             <motion.div
@@ -184,7 +184,7 @@ const PackageDetail = () => {
                 <img
                   src={pkg.images[selectedImage]}
                   alt={pkg.name}
-                  className="w-full h-64 sm:h-80 md:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="w-full h-56 sm:h-80 md:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
               </div>
@@ -229,7 +229,7 @@ const PackageDetail = () => {
               </h1>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
-                <div className="flex items-center gap-3 p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div className="flex items-center gap-3 p-3 sm:p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
                   <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
                     <Clock className="w-5 h-5 text-orange-600" />
                   </div>
@@ -238,7 +238,7 @@ const PackageDetail = () => {
                     <div className="font-medium text-gray-900">{pkg.duration}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div className="flex items-center gap-3 p-3 sm:p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
                    <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
                     <Users className="w-5 h-5 text-orange-600" />
                   </div>
@@ -254,7 +254,7 @@ const PackageDetail = () => {
               </p>
 
               {/* Price Card */}
-              <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl border border-gray-100">
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-6 md:p-8 shadow-xl border border-gray-100">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
                   <div>
                     <div className="text-sm text-gray-500 mb-1">Starting from</div>
@@ -295,7 +295,7 @@ const PackageDetail = () => {
                 <div className="flex flex-col gap-3">
                    <Button 
                     size="xl" 
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white rounded-xl h-12 sm:h-14 text-base sm:text-lg font-medium shadow-orange-200 shadow-lg"
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white rounded-xl h-11 sm:h-14 text-base sm:text-lg font-medium shadow-orange-200 shadow-lg"
                     onClick={handleBookNow}
                   >
                     {totalPrice ? `Request Booking for ₹ ${totalPrice.toLocaleString()}` : 'Request Booking'}
