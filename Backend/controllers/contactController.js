@@ -89,7 +89,8 @@ exports.submitContactForm = async (req, res) => {
 
 /**
  * GET /api/contact/admin/all
- * Fetch all inquiries (admin). Supports ?status=New filter.
+ * Fetch all inquiries (admin). Supports ?status=New filter and pagination.
+ * Query params: ?status=New&page=1&limit=10
  */
 exports.getAllInquiries = async (req, res) => {
   try {
@@ -98,11 +99,22 @@ exports.getAllInquiries = async (req, res) => {
       filter.status = req.query.status;
     }
 
-    const inquiries = await Contact.find(filter).sort({ createdAt: -1 });
+    // Pagination
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
+    const skip = (page - 1) * limit;
+
+    const [inquiries, totalCount] = await Promise.all([
+      Contact.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Contact.countDocuments(filter),
+    ]);
 
     res.json({
       success: true,
       count: inquiries.length,
+      totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+      currentPage: page,
       inquiries,
     });
   } catch (err) {

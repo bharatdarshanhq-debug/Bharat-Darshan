@@ -13,14 +13,21 @@ const getAdminToken = () => {
 };
 
 /**
- * Fetch all inquiries (optionally filter by status)
- * @param {string} [status] - Optional status filter: 'New', 'Contacted', 'Resolved'
+ * Fetch all inquiries with pagination (optionally filter by status)
+ * @param {Object} [options] - Query options
+ * @param {string} [options.status] - Optional status filter: 'New', 'Contacted', 'Resolved'
+ * @param {number} [options.page=1] - Page number
+ * @param {number} [options.limit=10] - Items per page
+ * @returns {{ inquiries, totalCount, totalPages, currentPage }}
  */
-export const fetchAllInquiries = async (status) => {
+export const fetchAllInquiries = async ({ status, page = 1, limit = 10 } = {}) => {
   const token = getAdminToken();
-  const query = status && status !== 'all' ? `?status=${status}` : '';
+  const params = new URLSearchParams();
+  if (status && status !== 'all') params.set('status', status);
+  params.set('page', String(page));
+  params.set('limit', String(limit));
 
-  const response = await fetch(`${API_URL}/contact/admin/all${query}`, {
+  const response = await fetch(`${API_URL}/contact/admin/all?${params.toString()}`, {
     headers: {
       'Authorization': `Bearer ${token}`,
     },
@@ -32,7 +39,12 @@ export const fetchAllInquiries = async (status) => {
     throw new Error(data.error || 'Failed to fetch inquiries');
   }
 
-  return data.inquiries;
+  return {
+    inquiries: data.inquiries,
+    totalCount: data.totalCount,
+    totalPages: data.totalPages,
+    currentPage: data.currentPage,
+  };
 };
 
 /**

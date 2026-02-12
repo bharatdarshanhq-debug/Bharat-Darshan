@@ -13,6 +13,8 @@ import {
   RefreshCw,
   MapPin,
   Package,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Primitives';
 import { Input } from '@/components/ui/Primitives';
@@ -56,6 +58,8 @@ const statusIcons = {
   Resolved: CheckCircle,
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function InquiriesPage() {
   const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,23 +69,41 @@ export default function InquiriesPage() {
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const [actionLoading, setActionLoading] = useState(null); // tracks id of item being acted on
 
+  // ─── Pagination state ────────────────────────────────────────
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
   // ─── Fetch inquiries from backend ────────────────────────────
-  const loadInquiries = useCallback(async () => {
+  const loadInquiries = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchAllInquiries();
-      setInquiries(data);
+      const data = await fetchAllInquiries({
+        status: statusFilter,
+        page,
+        limit: ITEMS_PER_PAGE,
+      });
+      setInquiries(data.inquiries);
+      setTotalPages(data.totalPages);
+      setTotalCount(data.totalCount);
+      setCurrentPage(data.currentPage);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [statusFilter]);
 
   useEffect(() => {
-    loadInquiries();
+    setCurrentPage(1);
+    loadInquiries(1);
   }, [loadInquiries]);
+
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages) return;
+    loadInquiries(page);
+  };
 
   // ─── Status update handler ──────────────────────────────────
   const handleStatusUpdate = async (id, newStatus, e) => {
@@ -111,8 +133,13 @@ export default function InquiriesPage() {
       setActionLoading(id);
       await deleteInquiry(id);
       setInquiries((prev) => prev.filter((inq) => inq._id !== id));
+      setTotalCount((prev) => prev - 1);
       if (selectedInquiry && selectedInquiry._id === id) {
         setSelectedInquiry(null);
+      }
+      // If we deleted the last item on this page, go back one page
+      if (inquiries.length <= 1 && currentPage > 1) {
+        goToPage(currentPage - 1);
       }
     } catch (err) {
       setError(err.message);
@@ -121,16 +148,16 @@ export default function InquiriesPage() {
     }
   };
 
-  // ─── Client-side filtering ──────────────────────────────────
+  // ─── Client-side search filtering (status is handled server-side) ──
   const filteredInquiries = inquiries.filter((inquiry) => {
-    const matchesSearch =
-      inquiry.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inquiry.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (inquiry.message || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (inquiry.package || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === 'all' || inquiry.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      inquiry.name.toLowerCase().includes(q) ||
+      inquiry.email.toLowerCase().includes(q) ||
+      (inquiry.message || '').toLowerCase().includes(q) ||
+      (inquiry.package || '').toLowerCase().includes(q)
+    );
   });
 
   // ─── Time ago helper ────────────────────────────────────────
@@ -149,7 +176,20 @@ export default function InquiriesPage() {
     return `${diffDays} days ago`;
   };
 
-  const newCount = inquiries.filter((i) => i.status === 'New').length;
+  const newCount = statusFilter === 'New' ? totalCount : inquiries.filter((i) => i.status === 'New').length;
+
+  // ─── Pagination page numbers helper ─────────────────────────
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  };
 
   // ─── Loading state ──────────────────────────────────────────
   if (loading) {
@@ -178,7 +218,7 @@ export default function InquiriesPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={loadInquiries}
+            onClick={() => loadInquiries(currentPage)}
             className="gap-1"
           >
             <RefreshCw className="h-4 w-4" />
@@ -375,10 +415,103 @@ export default function InquiriesPage() {
         >
           <MessageSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
           <p className="text-muted-foreground">
-            {inquiries.length === 0
+            {totalCount === 0
               ? 'No inquiries yet. They will appear here when users submit the contact form.'
-              : 'No inquiries match your filters.'}
+              : 'No inquiries match your search.'}
           </p>
+        </motion.div>
+      )}
+
+      {/* ─── Pagination ─────────────────────────────────────────── */}
+      {totalPages > 1 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2"
+        >
+          <p className="text-sm text-muted-foreground">
+            Showing{' '}
+            <span className="font-medium text-foreground">
+              {(currentPage - 1) * ITEMS_PER_PAGE + 1}
+            </span>
+            –
+            <span className="font-medium text-foreground">
+              {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}
+            </span>{' '}
+            of{' '}
+            <span className="font-medium text-foreground">{totalCount}</span> inquiries
+          </p>
+
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9"
+              disabled={currentPage <= 1}
+              onClick={() => goToPage(currentPage - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            {getPageNumbers()[0] > 1 && (
+              <>
+                <Button
+                  variant={currentPage === 1 ? 'default' : 'outline'}
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => goToPage(1)}
+                >
+                  1
+                </Button>
+                {getPageNumbers()[0] > 2 && (
+                  <span className="px-1 text-muted-foreground">…</span>
+                )}
+              </>
+            )}
+
+            {getPageNumbers().map((page) => (
+              <Button
+                key={page}
+                variant={page === currentPage ? 'default' : 'outline'}
+                size="icon"
+                className={`h-9 w-9 ${
+                  page === currentPage
+                    ? 'bg-gradient-primary text-white hover:opacity-90'
+                    : ''
+                }`}
+                onClick={() => goToPage(page)}
+              >
+                {page}
+              </Button>
+            ))}
+
+            {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
+              <>
+                {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
+                  <span className="px-1 text-muted-foreground">…</span>
+                )}
+                <Button
+                  variant={currentPage === totalPages ? 'default' : 'outline'}
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => goToPage(totalPages)}
+                >
+                  {totalPages}
+                </Button>
+              </>
+            )}
+
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9"
+              disabled={currentPage >= totalPages}
+              onClick={() => goToPage(currentPage + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </motion.div>
       )}
 
