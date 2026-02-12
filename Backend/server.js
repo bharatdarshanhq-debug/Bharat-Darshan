@@ -1,0 +1,55 @@
+const express = require('express');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const connectDB = require('./config/db');
+
+// Load env vars
+dotenv.config();
+connectDB();
+
+const app = express();
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL 
+      ? [process.env.FRONTEND_URL, 'https://bharat-darshan01.vercel.app', 'https://www.bharat-darshan.com', 'https://bharat-darshan.com', 'https://admin.bharat-darshan.com', 'http://localhost:5173', 'http://localhost:3000', 'http://localhost:8081']
+      : ['https://bharat-darshan01.vercel.app', 'https://www.bharat-darshan.com', 'https://bharat-darshan.com', 'https://admin.bharat-darshan.com', 'http://localhost:5173', 'http://localhost:3000', 'http://localhost:8081'],
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/bookings', require('./routes/bookingRoutes'));
+app.use('/api/contact', require('./routes/contactRoutes'));
+app.use('/api/destinations', require('./routes/destinationRoutes'));
+app.use('/api/packages', require('./routes/packageRoutes'));
+app.use('/api/payments', require('./routes/paymentRoutes'));
+app.use('/api/hotels', require('./routes/hotelRoutes'));
+app.use('/api/states', require('./routes/stateRoutes'));
+app.use('/api/faqs', require('./routes/faqRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
+
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Bharat Darshan API is running' });
+});
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    error: `Route ${req.originalUrl} not found`,
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    error: err.message || 'Server Error',
+  });
+});
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
