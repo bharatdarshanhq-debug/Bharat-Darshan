@@ -1,9 +1,6 @@
 import { motion } from 'framer-motion';
 import {
   CalendarCheck,
-  Clock,
-  CheckCircle,
-  MessageSquare,
   Building2,
   IndianRupee,
   TrendingUp,

@@ -16,7 +16,6 @@ const Bookings = () => {
   const [bookings, setBookings] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     fetchBookings(currentPage);
@@ -44,7 +43,6 @@ const Bookings = () => {
       if (data.success) {
         setBookings(data.bookings);
         setTotalPages(data.pages);
-        setTotalCount(data.count);
         setCurrentPage(data.page);
       } else {
         if (response.status === 401) {
