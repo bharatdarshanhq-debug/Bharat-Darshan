@@ -291,15 +291,16 @@ export const mockInquiries = [
 
 // Dashboard Stats
 export const mockDashboardStats = {
-  totalBookings: 156,
+  totalBookings: 144,
   pendingBookings: 12,
   confirmedBookings: 89,
   todayInquiries: 4,
-  totalRevenue: 4850000,
-  monthlyRevenue: 842000,
-  activePackages: 18,
-  activeDestinations: 12,
-  activeHotels: 24,
+  totalRevenue: 0,
+  monthlyRevenue: 0,
+  activePackages: 5,
+  activeDestinations: 1,
+  activeHotels: 92,
+  websiteVisits: 11000,
 };
 
 // Chart Data
@@ -313,10 +314,9 @@ export const bookingsByMonth = [
 ];
 
 export const bookingsByDestination = [
-  { name: 'Rajasthan', value: 35, color: 'hsl(var(--chart-1))' },
-  { name: 'Kerala', value: 28, color: 'hsl(var(--chart-2))' },
-  { name: 'Golden Triangle', value: 22, color: 'hsl(var(--chart-3))' },
-  { name: 'Goa', value: 15, color: 'hsl(var(--chart-4))' },
+  { name: 'Kolkata', value: 70, color: 'hsl(var(--chart-1))' },
+  { name: 'Odisha', value: 20, color: 'hsl(var(--chart-2))' },
+  { name: 'Others', value: 10, color: 'hsl(var(--chart-3))' },
 ];
 
 export const bookingsByTier = [

@@ -85,8 +85,8 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2 
         const razorpayKey = await getRazorpayKey();
         
         // Check if Razorpay is properly configured
-        if (!razorpayKey || razorpayKey.includes('demo')) {
-          toast.info('Payment gateway is in demo mode. Booking saved successfully!');
+        if (!razorpayKey) {
+          toast.info('Payment gateway is not configured. Booking saved successfully!');
           onClose();
           // Redirect to hotel selection page first
           window.location.href = `/bookings/${booking._id}/select-hotels`;

@@ -14,20 +14,26 @@ const Bookings = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [bookings, setBookings] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
-    fetchBookings();
-  }, []);
+    fetchBookings(currentPage);
+  }, [currentPage]);
 
-  const fetchBookings = async () => {
+  const fetchBookings = async (page = 1) => {
     try {
+      setIsLoading(true);
       const token = localStorage.getItem("token");
       if (!token) {
         navigate("/login");
         return;
       }
 
-      const response = await fetch(`${API_URL}/bookings`, {
+      // Default limit is 5 for user view
+      const limit = 5;
+      const response = await fetch(`${API_URL}/bookings?page=${page}&limit=${limit}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -37,6 +43,9 @@ const Bookings = () => {
 
       if (data.success) {
         setBookings(data.bookings);
+        setTotalPages(data.pages);
+        setTotalCount(data.count);
+        setCurrentPage(data.page);
       } else {
         if (response.status === 401) {
              navigate("/login");
@@ -49,6 +58,13 @@ const Bookings = () => {
       toast.error("Error loading bookings");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      window.scrollTo(0, 0);
     }
   };
 
@@ -184,6 +200,31 @@ const Bookings = () => {
                     </div>
                   </motion.div>
                 ))}
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-8">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page <span className="font-medium text-foreground">{currentPage}</span> of <span className="font-medium text-foreground">{totalPages}</span>
+                </span>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
               </div>
             )}
           </div>

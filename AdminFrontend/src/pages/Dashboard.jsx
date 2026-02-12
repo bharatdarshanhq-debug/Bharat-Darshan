@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Package,
   MapPin,
+  Globe,
 } from 'lucide-react';
 import { StatCard } from '@/components/admin/StatCard';
 import { RecentActivity } from '@/components/admin/RecentActivity';
@@ -19,6 +20,7 @@ import { TierBreakdownChart } from '@/components/admin/charts/TierBreakdownChart
 import { mockDashboardStats } from '@/data/mockData';
 
 const formatCurrency = (value) => {
+  if (value === 0) return '₹0';
   if (value >= 100000) {
     return `₹${(value / 100000).toFixed(1)}L`;
   }
@@ -39,34 +41,42 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Stats Grid */}
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Bookings"
+          title="Website Visited"
+          value={mockDashboardStats.websiteVisits?.toLocaleString() || '12,450'}
+          change="+24% this week"
+          changeType="positive"
+          icon={Globe}
+          iconColor="text-blue-500"
+          delay={0}
+        />
+        <StatCard
+          title="Booking Attempts"
           value={mockDashboardStats.totalBookings}
           change="+12% from last month"
           changeType="positive"
           icon={CalendarCheck}
           iconColor="text-primary"
-          delay={0}
+          delay={0.1}
         />
         <StatCard
           title="Total Revenue"
           value={formatCurrency(mockDashboardStats.totalRevenue)}
-          change="+18% YoY"
-          changeType="positive"
+          change="+0% YoY"
+          changeType="neutral"
           icon={IndianRupee}
           iconColor="text-success"
-          delay={0.1}
+          delay={0.2}
         />
         <StatCard
           title="This Month Revenue"
           value={formatCurrency(mockDashboardStats.monthlyRevenue)}
-          change="+5% from last month"
-          changeType="positive"
+          change="No revenue yet"
+          changeType="neutral"
           icon={TrendingUp}
           iconColor="text-primary"
-          delay={0.2}
+          delay={0.3}
         />
         <StatCard
           title="Active Packages"
@@ -75,7 +85,7 @@ export default function Dashboard() {
           changeType="neutral"
           icon={Package}
           iconColor="text-secondary"
-          delay={0.3}
+          delay={0.4}
         />
         <StatCard
           title="Active Destinations"
@@ -84,7 +94,7 @@ export default function Dashboard() {
           changeType="neutral"
           icon={MapPin}
           iconColor="text-info"
-          delay={0.4}
+          delay={0.5}
         />
         <StatCard
           title="Active Hotels"
@@ -93,7 +103,7 @@ export default function Dashboard() {
           changeType="neutral"
           icon={Building2}
           iconColor="text-warning"
-          delay={0.5}
+          delay={0.6}
         />
       </div>
 

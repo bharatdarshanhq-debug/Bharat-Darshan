@@ -2,6 +2,26 @@
 import { motion } from "framer-motion";
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/forms";
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default marker icon in leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+const redIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -312,25 +332,50 @@ const Contact = () => {
                 </h2>
                 
                 <div className="bg-card rounded-2xl overflow-hidden shadow-card mb-8">
-                  <div className="h-64 bg-muted flex items-center justify-center">
-                    <div className="text-center">
-                      <MapPin className="w-12 h-12 text-primary mx-auto mb-2" />
-                      <p className="text-muted-foreground">Map placeholder</p>
-                    </div>
+                  <div className="h-64 z-0">
+                    <MapContainer 
+                      center={[20.296059, 85.867256]} 
+                      zoom={15} 
+                      scrollWheelZoom={false} 
+                      className="h-full w-full"
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <Marker position={[20.296059, 85.867256]} icon={redIcon}>
+                        <Popup>
+                          Bharat Darshan Travels <br /> Esplanade One Mall, Bhubaneswar.
+                        </Popup>
+                      </Marker>
+                    </MapContainer>
                   </div>
                   <div className="p-6">
                     <h3 className="font-semibold text-foreground mb-2">Bharat Darshan Travels</h3>
                     <p className="text-muted-foreground mb-4">
-                      Grand Road, Near Jagannath Temple,<br />
-                      Puri, Odisha - 752001, India
+                      Office No: 307, 3rd Floor, <br />
+                      Esplanade One Mall, Rasulgarh, <br />
+                      Bhubaneswar, Odisha 751010, India
                     </p>
                     <div className="flex gap-3">
-                      <Button variant="default" size="sm">
-                        Get Directions
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        View on Map
-                      </Button>
+                      <a 
+                        href="https://www.google.com/maps/dir/?api=1&destination=20.296059,85.867256" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="default" size="sm">
+                          Get Directions
+                        </Button>
+                      </a>
+                      <a 
+                        href="https://www.google.com/maps/search/?api=1&query=20.296059,85.867256" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="outline" size="sm">
+                          View on Map
+                        </Button>
+                      </a>
                     </div>
                   </div>
                 </div>

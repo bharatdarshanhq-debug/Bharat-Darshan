@@ -1,6 +1,6 @@
 /**
  * Seed script to insert 50 random Puri-related inquiries into the Contact collection.
- * Location distribution: 50% Odisha, 35% Kolkata, 15% Other
+ * Location distribution: 70% Kolkata, 20% Odisha, 10% Other
  * Run: node scripts/seedInquiries.js
  */
 
@@ -215,12 +215,12 @@ function generateInquiry(region) {
 // ─── Generate all inquiries with location distribution ──────────
 function generateInquiries(count) {
   const inquiries = [];
-  const odishaCount = Math.round(count * 0.50);    // 50%
-  const kolkataCount = Math.round(count * 0.35);    // 35%
-  const otherCount = count - odishaCount - kolkataCount; // 15%
+  const kolkataCount = Math.round(count * 0.70);    // 70%
+  const odishaCount = Math.round(count * 0.20);     // 20%
+  const otherCount = count - kolkataCount - odishaCount; // 10%
 
-  for (let i = 0; i < odishaCount; i++) inquiries.push(generateInquiry('odisha'));
   for (let i = 0; i < kolkataCount; i++) inquiries.push(generateInquiry('kolkata'));
+  for (let i = 0; i < odishaCount; i++) inquiries.push(generateInquiry('odisha'));
   for (let i = 0; i < otherCount; i++) inquiries.push(generateInquiry('other'));
 
   // Shuffle so they aren't grouped by region
@@ -247,7 +247,7 @@ async function main() {
     const inquiries = generateInquiries(INQUIRY_COUNT);
 
     console.log(`Inserting ${INQUIRY_COUNT} Puri-related inquiries...`);
-    console.log(`  → Odisha: ${Math.round(INQUIRY_COUNT * 0.50)} | Kolkata: ${Math.round(INQUIRY_COUNT * 0.35)} | Other: ${INQUIRY_COUNT - Math.round(INQUIRY_COUNT * 0.50) - Math.round(INQUIRY_COUNT * 0.35)}\n`);
+    console.log(`  → Kolkata: ${Math.round(INQUIRY_COUNT * 0.70)} | Odisha: ${Math.round(INQUIRY_COUNT * 0.20)} | Other: ${INQUIRY_COUNT - Math.round(INQUIRY_COUNT * 0.70) - Math.round(INQUIRY_COUNT * 0.20)}\n`);
 
     const result = await Contact.insertMany(inquiries);
     console.log(`✅ Successfully inserted ${result.length} inquiries.\n`);

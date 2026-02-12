@@ -48,10 +48,21 @@ const createBooking = async (req, res) => {
 
 const getBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const count = await Booking.countDocuments({ user: req.user._id });
+    const bookings = await Booking.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
     res.json({
       success: true,
-      count: bookings.length,
+      count, // Total count of bookings for user
+      pages: Math.ceil(count / limit),
+      page,
       bookings,
     });
   } catch (error) {

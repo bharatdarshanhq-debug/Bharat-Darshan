@@ -3,18 +3,21 @@ const crypto = require('crypto');
 const Booking = require('../models/Booking');
 
 // Initialize Razorpay only if credentials are available
+// Initialize Razorpay only if credentials are available
 let razorpay = null;
-// if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET && 
-//     !process.env.RAZORPAY_KEY_ID.includes('demo') && 
-//     !process.env.RAZORPAY_KEY_SECRET.includes('demo')) {
-//   razorpay = new Razorpay({
-//     key_id: process.env.RAZORPAY_KEY_ID,
-//     key_secret: process.env.RAZORPAY_KEY_SECRET,
-//   });
-//   console.log('✅ Razorpay initialized successfully');
-// } else {
-//   console.log('⚠️  Razorpay not initialized - set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env');
-// }
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+  try {
+    razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+    console.log('✅ Razorpay initialized successfully');
+  } catch (err) {
+    console.error('❌ Razorpay initialization failed:', err.message);
+  }
+} else {
+  console.log('⚠️  Razorpay not initialized - set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env');
+}
 
 /**
  * @desc    Create Razorpay order
