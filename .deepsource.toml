@@ -1,5 +1,12 @@
 version = 1
 
+exclude_patterns = [
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/build/**",
+  "**/coverage/**"
+]
+
 [[analyzers]]
 name = "javascript"
 enabled = true
@@ -7,10 +14,3 @@ enabled = true
   [analyzers.meta]
   plugins = ["react"]
   environment = ["nodejs", "browser"]
-
-exclude_patterns = [
-  "**/node_modules/**",
-  "**/dist/**",
-  "**/build/**",
-  "**/coverage/**"
-]
