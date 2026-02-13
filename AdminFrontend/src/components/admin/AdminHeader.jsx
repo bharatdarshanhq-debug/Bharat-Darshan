@@ -1,5 +1,5 @@
 import { Bell, Search, User } from 'lucide-react';
-import { Input, Button } from '@/components/ui/Primitives';
+import { Input, Button, Avatar, AvatarFallback, AvatarImage, Badge } from '@/components/ui/Primitives';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/Interactive';
-import { Avatar, AvatarFallback, AvatarImage, Badge } from '@/components/ui/Primitives';
 
 export function AdminHeader() {
   const navigate = useNavigate();
@@ -56,14 +55,15 @@ export function AdminHeader() {
   };
 
   const handleLogout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
+    // eslint-disable-next-line no-restricted-globals, no-alert
+    if (confirm("Are you sure you want to logout?")) {
       adminAuthService.logout();
       navigate('/login');
     }
   };
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-card/95 backdrop-blur-sm border-b border-border flex items-center justify-between px-6">
+    <header role="banner" aria-label="Admin header" className="sticky top-0 z-30 h-16 bg-card/95 backdrop-blur-sm border-b border-border flex items-center justify-between px-6">
       {/* Search */}
       <div className="relative w-full max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

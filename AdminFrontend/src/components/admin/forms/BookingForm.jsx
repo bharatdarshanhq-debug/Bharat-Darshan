@@ -7,10 +7,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  sonnerToast as toast,
 } from '@/components/ui/Interactive';
 import { createManualBooking } from '@/services/bookingService';
 import { fetchAllPackages } from '@/services/packageService';
-import { sonnerToast as toast } from '@/components/ui/Interactive';
 
 export function BookingForm({ onClose, initialData, onSuccess }) {
   const [loading, setLoading] = useState(false);
@@ -119,7 +119,7 @@ export function BookingForm({ onClose, initialData, onSuccess }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form role="form" aria-label="Create booking form" onSubmit={handleSubmit} className="space-y-6">
       
       {/* Customer Information */}
       <div className="form-section">

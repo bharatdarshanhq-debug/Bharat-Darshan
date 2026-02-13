@@ -18,13 +18,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/Interactive';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  sonnerToast as toast,
 } from '@/components/ui/Interactive';
 import {
   Dialog,
@@ -36,7 +35,6 @@ import {
 import { BookingDetail } from '@/components/admin/BookingDetail';
 import { BookingForm } from '@/components/admin/forms/BookingForm';
 import { getAllBookings, updateBookingStatus, deleteBooking } from '@/services/bookingService';
-import { sonnerToast as toast } from '@/components/ui/Interactive';
 
 const statusColors = {
   pending: 'badge-pending',
@@ -89,7 +87,8 @@ export default function BookingsPage() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this booking? This action cannot be undone.')) {
+    // eslint-disable-next-line no-restricted-globals, no-alert
+    if (confirm('Are you sure you want to delete this booking? This action cannot be undone.')) {
       try {
         await deleteBooking(id);
         toast.success('Booking deleted successfully');
