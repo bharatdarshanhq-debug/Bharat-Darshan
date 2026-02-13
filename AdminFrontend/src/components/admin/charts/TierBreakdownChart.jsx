@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { bookingsByTier } from '@/data/mockData';
+
+
 
 const tierColors = {
   Lite: 'bg-green-500',

@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { bookingsByDestination } from '@/data/mockData';
 
 const COLORS = [
   'hsl(var(--chart-1))',
@@ -38,7 +37,7 @@ export function DestinationChart({ data }) {
               >
                 {chartData.map((entry, index) => (
                   <Cell 
-                    key={`cell-${index}`} 
+                    key={`cell-${entry.name}`} 
                     fill={COLORS[index % COLORS.length]}
                     strokeWidth={0}
                   />

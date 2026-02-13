@@ -1,6 +1,5 @@
 import { Bell, Search, User } from 'lucide-react';
-import { Input } from '@/components/ui/Primitives';
-import { Button } from '@/components/ui/Primitives';
+import { Input, Button } from '@/components/ui/Primitives';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
@@ -14,8 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/Interactive';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Primitives';
-import { Badge } from '@/components/ui/Primitives';
+import { Avatar, AvatarFallback, AvatarImage, Badge } from '@/components/ui/Primitives';
 
 export function AdminHeader() {
   const navigate = useNavigate();

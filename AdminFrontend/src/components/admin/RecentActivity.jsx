@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { CalendarCheck, MessageSquare, CreditCard, CheckCircle } from 'lucide-react';
-import { recentActivity } from '@/data/mockData';
+
+
 import { cn } from '@/lib/utils';
 
 const getActivityIcon = (type) => {

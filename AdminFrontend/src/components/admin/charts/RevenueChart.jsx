@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { bookingsByMonth } from '@/data/mockData';
+
 
 const formatCurrency = (value) => {
   if (value >= 100000) {

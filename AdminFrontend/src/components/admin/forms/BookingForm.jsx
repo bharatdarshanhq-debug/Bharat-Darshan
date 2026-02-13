@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react';
 import { IndianRupee, User, MapPin, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/Primitives';
-import { Input } from '@/components/ui/Primitives';
-import { Label } from '@/components/ui/Primitives';
-import { Textarea } from '@/components/ui/Primitives';
+import { Button, Input, Label, Textarea, Separator } from '@/components/ui/Primitives';
 import {
   Select,
   SelectContent,
@@ -11,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/Interactive';
-import { Separator } from '@/components/ui/Primitives';
 import { createManualBooking } from '@/services/bookingService';
 import { fetchAllPackages } from '@/services/packageService';
 import { sonnerToast as toast } from '@/components/ui/Interactive';

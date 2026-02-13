@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { bookingsByMonth } from '@/data/mockData';
+
 
 export function BookingsChart({ data }) {
   const chartData = data || [];
