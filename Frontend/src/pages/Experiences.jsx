@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-import jagannathImage from "@/assets/Experience2.webp";
 import experienceHero from "@/assets/ExperienceHero.webp";
 import experience2 from "@/assets/Experience2.webp";
 import experience3 from "@/assets/Experience3.webp";
@@ -235,7 +234,7 @@ const Experiences = () => {
                 viewport={{ once: true }}
               >
                 <img
-                  src={jagannathImage}
+                  src={experience2}
                   alt="Our Story"
                   className="rounded-2xl shadow-elevated"
                 />

@@ -1,11 +1,6 @@
 import { useState, useRef } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/Primitives';
-import { Input } from '@/components/ui/Primitives';
-import { Label } from '@/components/ui/Primitives';
-import { Textarea } from '@/components/ui/Primitives';
-import { Switch } from '@/components/ui/Primitives';
-import { Separator } from '@/components/ui/Primitives';
+import { Button, Input, Label, Textarea, Switch, Separator } from '@/components/ui/Primitives';
 import { createDestination, updateDestination } from '@/services/destinationService';
 
 export function DestinationForm({ onClose, initialData, onSuccess }) {

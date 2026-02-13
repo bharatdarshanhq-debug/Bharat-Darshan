@@ -16,10 +16,7 @@ import {
   Loader2,
   RefreshCw,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Primitives';
-import { Input } from '@/components/ui/Primitives';
-import { Badge } from '@/components/ui/Primitives';
-import { Separator } from '@/components/ui/Primitives';
+import { Button, Input, Badge, Separator } from '@/components/ui/Primitives';
 import {
   Select,
   SelectContent,
@@ -67,6 +64,7 @@ export default function PackagesPage() {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirmPkg, setDeleteConfirmPkg] = useState(null);
 
   // Fetch packages from API
   const loadPackages = async () => {
@@ -110,9 +108,11 @@ export default function PackagesPage() {
   };
 
   const handleDelete = async (pkg) => {
-    if (!confirm(`Are you sure you want to permanently delete "${pkg.name}"? This action cannot be undone.`)) {
+    if (!deleteConfirmPkg || deleteConfirmPkg._id !== pkg._id) {
+      setDeleteConfirmPkg(pkg);
       return;
     }
+    setDeleteConfirmPkg(null);
     
     try {
       setIsDeleting(true);
@@ -121,7 +121,7 @@ export default function PackagesPage() {
       await loadPackages(); // Refresh the list
     } catch (err) {
       console.error('Error deleting package:', err);
-      alert('Failed to delete package: ' + err.message);
+      setError('Failed to delete package: ' + err.message);
     } finally {
       setIsDeleting(false);
     }
@@ -293,12 +293,12 @@ export default function PackagesPage() {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem 
-                        className="cursor-pointer text-destructive"
+                        className={`cursor-pointer ${deleteConfirmPkg?._id === pkg._id ? 'text-white bg-red-600 focus:bg-red-700 focus:text-white' : 'text-destructive'}`}
                         onClick={() => handleDelete(pkg)}
                         disabled={isDeleting}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
+                        {deleteConfirmPkg?._id === pkg._id ? 'Click to Confirm' : 'Delete'}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

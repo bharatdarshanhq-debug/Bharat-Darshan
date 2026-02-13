@@ -16,9 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Primitives';
-import { Input } from '@/components/ui/Primitives';
-import { Badge } from '@/components/ui/Primitives';
+import { Button, Input, Badge } from '@/components/ui/Primitives';
 import {
   Select,
   SelectContent,
@@ -68,6 +66,7 @@ export default function InquiriesPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const [actionLoading, setActionLoading] = useState(null); // tracks id of item being acted on
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null); // tracks id of item pending delete confirmation
 
   // ─── Pagination state ────────────────────────────────────────
   const [currentPage, setCurrentPage] = useState(1);
@@ -128,7 +127,11 @@ export default function InquiriesPage() {
   // ─── Delete handler ─────────────────────────────────────────
   const handleDelete = async (id, e) => {
     if (e) e.stopPropagation();
-    if (!window.confirm('Are you sure you want to delete this inquiry? This action cannot be undone.')) return;
+    if (!deleteConfirmId || deleteConfirmId !== id) {
+      setDeleteConfirmId(id);
+      return;
+    }
+    setDeleteConfirmId(null);
     try {
       setActionLoading(id);
       await deleteInquiry(id);
@@ -392,11 +395,11 @@ export default function InquiriesPage() {
                       )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        className="cursor-pointer text-red-600 focus:text-red-600"
+                        className={`cursor-pointer ${deleteConfirmId === inquiry._id ? 'text-white bg-red-600 focus:bg-red-700 focus:text-white' : 'text-red-600 focus:text-red-600'}`}
                         onClick={(e) => handleDelete(inquiry._id, e)}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Inquiry
+                        {deleteConfirmId === inquiry._id ? 'Click to Confirm Delete' : 'Delete Inquiry'}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

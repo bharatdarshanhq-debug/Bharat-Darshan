@@ -1,9 +1,6 @@
 import { motion } from 'framer-motion';
 import { Settings, Bell, Shield, Database, Globe, CreditCard } from 'lucide-react';
-import { Button } from '@/components/ui/Primitives';
-import { Switch } from '@/components/ui/Primitives';
-import { Label } from '@/components/ui/Primitives';
-import { Separator } from '@/components/ui/Primitives';
+import { Button, Switch, Label, Separator } from '@/components/ui/Primitives';
 
 const settingsGroups = [
   {

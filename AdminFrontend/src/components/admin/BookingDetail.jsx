@@ -1,7 +1,5 @@
 import { Calendar, Users, IndianRupee, MapPin, Phone, Mail, Building2 } from 'lucide-react';
-import { Badge } from '@/components/ui/Primitives';
-import { Button } from '@/components/ui/Primitives';
-import { Separator } from '@/components/ui/Primitives';
+import { Badge, Button, Separator, Textarea, Label } from '@/components/ui/Primitives';
 import {
   Select,
   SelectContent,
@@ -9,8 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/Interactive';
-import { Textarea } from '@/components/ui/Primitives';
-import { Label } from '@/components/ui/Primitives';
 
 const statusColors = {
   pending: 'badge-pending',

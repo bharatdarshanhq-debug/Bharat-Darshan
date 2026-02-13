@@ -14,10 +14,7 @@ import {
   Waves,
   MapPin, // Added MapPin
 } from 'lucide-react';
-import { Separator } from '@/components/ui/Primitives'; // Added Separator
-import { Button } from '@/components/ui/Primitives';
-import { Input } from '@/components/ui/Primitives';
-import { Badge } from '@/components/ui/Primitives';
+import { Separator, Button, Input, Badge } from '@/components/ui/Primitives';
 import {
   Select,
   SelectContent,

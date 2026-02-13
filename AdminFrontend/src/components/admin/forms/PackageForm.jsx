@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/Primitives';
-import { Input } from '@/components/ui/Primitives';
-import { Label } from '@/components/ui/Primitives';
-import { Textarea } from '@/components/ui/Primitives';
+import { Button, Input, Label, Textarea, Separator } from '@/components/ui/Primitives';
 import {
   Select,
   SelectContent,
@@ -10,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/Interactive';
-import { Separator } from '@/components/ui/Primitives';
+
 import { ImagePlus, X, Loader2, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { createPackage, updatePackage } from '@/services/packageService';
 

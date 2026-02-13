@@ -39,10 +39,8 @@ export function AdminSidebar({ isCollapsed, onToggle }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
-      adminAuthService.logout();
-      navigate('/login');
-    }
+    adminAuthService.logout();
+    navigate('/login');
   };
 
   return (

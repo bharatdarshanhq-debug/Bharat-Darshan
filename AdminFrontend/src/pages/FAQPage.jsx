@@ -12,9 +12,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Primitives';
-import { Input } from '@/components/ui/Primitives';
-import { Badge } from '@/components/ui/Primitives';
+import { Button, Input, Badge } from '@/components/ui/Primitives';
 import {
   DropdownMenu,
   DropdownMenuContent,
