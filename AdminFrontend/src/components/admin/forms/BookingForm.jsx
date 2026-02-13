@@ -99,8 +99,8 @@ export function BookingForm({ onClose, initialData, onSuccess }) {
         // For this iteration, we will send these as part of "contact" info or assume backend can handle it.
         
         // Extended payload if backend supports it (or ignored)
-        customerName: formData.customerName,
-        customerEmail: formData.customerEmail,
+        contactName: formData.customerName,
+        contactEmail: formData.customerEmail,
         paymentStatus: formData.paymentStatus,
         paymentMethod: formData.paymentMode,
         paymentId: formData.transactionId,

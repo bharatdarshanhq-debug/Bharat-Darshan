@@ -63,7 +63,7 @@ const Contact = () => {
         if (data.success) {
           setFaqs(data.faqs);
         }
-      } catch (_e) {
+      } catch {
         // Ignore faqs fetch error
       } finally {
         setFaqsLoading(false);
@@ -82,7 +82,7 @@ const Contact = () => {
         if (data.success) {
           setPackages(data.packages);
         }
-      } catch (_e) {
+      } catch {
         // Silently fail — dropdown will be empty. Ignore packages fetch error.
       }
     };
@@ -107,8 +107,7 @@ const Contact = () => {
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Something went wrong');
+        throw new Error(data.error || 'Something went wrong');
       }
 
       setSubmitted(true);

@@ -6,4 +6,11 @@ enabled = true
 
   [analyzers.meta]
   plugins = ["react"]
-  environment = ["nodejs"]
+  environment = ["nodejs", "browser"]
+
+exclude_patterns = [
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/build/**",
+  "**/coverage/**"
+]
