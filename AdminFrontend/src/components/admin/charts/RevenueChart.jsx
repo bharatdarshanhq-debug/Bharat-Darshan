@@ -17,7 +17,8 @@ const formatCurrency = (value) => {
   return `₹${(value / 1000).toFixed(0)}K`;
 };
 
-export function RevenueChart() {
+export function RevenueChart({ data }) {
+  const chartData = data || [];
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -38,7 +39,7 @@ export function RevenueChart() {
       
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={bookingsByMonth} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+          <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="hsl(var(--secondary))" stopOpacity={1} />

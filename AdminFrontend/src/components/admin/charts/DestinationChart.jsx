@@ -9,7 +9,8 @@ const COLORS = [
   'hsl(var(--chart-4))',
 ];
 
-export function DestinationChart() {
+export function DestinationChart({ data }) {
+  const chartData = data || [];
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -27,7 +28,7 @@ export function DestinationChart() {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={bookingsByDestination}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 innerRadius={50}
@@ -35,7 +36,7 @@ export function DestinationChart() {
                 paddingAngle={4}
                 dataKey="value"
               >
-                {bookingsByDestination.map((entry, index) => (
+                {chartData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
                     fill={COLORS[index % COLORS.length]}
@@ -57,7 +58,7 @@ export function DestinationChart() {
         </div>
         
         <div className="space-y-3 ml-4">
-          {bookingsByDestination.map((item, index) => (
+          {chartData.map((item, index) => (
             <div key={item.name} className="flex items-center gap-2">
               <div 
                 className="w-3 h-3 rounded-full" 

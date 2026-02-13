@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { IndianRupee, User, MapPin } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { IndianRupee, User, MapPin, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Primitives';
 import { Input } from '@/components/ui/Primitives';
 import { Label } from '@/components/ui/Primitives';
@@ -12,8 +12,13 @@ import {
   SelectValue,
 } from '@/components/ui/Interactive';
 import { Separator } from '@/components/ui/Primitives';
+import { createManualBooking } from '@/services/bookingService';
+import { fetchAllPackages } from '@/services/packageService';
+import { sonnerToast as toast } from '@/components/ui/Interactive';
 
-export function BookingForm({ onClose, initialData }) {
+export function BookingForm({ onClose, initialData, onSuccess }) {
+  const [loading, setLoading] = useState(false);
+  const [packages, setPackages] = useState([]);
   const [formData, setFormData] = useState(initialData || {
     // Customer Details
     customerName: '',
@@ -23,6 +28,7 @@ export function BookingForm({ onClose, initialData }) {
     
     // Trip Details
     tripType: 'package',
+    packageId: '',
     packageName: '',
     destination: '',
     startDate: '',
@@ -40,13 +46,80 @@ export function BookingForm({ onClose, initialData }) {
     bookingStatus: 'confirmed'
   });
 
+  useEffect(() => {
+    // Fetch packages for dropdown
+    const fetchPackages = async () => {
+      try {
+        const data = await fetchAllPackages(1, 100); // Fetch mostly all packages
+        setPackages(data.packages || []);
+      } catch (error) {
+        console.error('Failed to fetch packages', error);
+      }
+    };
+    fetchPackages();
+  }, []);
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handlePackageChange = (packageId) => {
+    const selectedPkg = packages.find(p => p._id === packageId);
+    if (selectedPkg) {
+      setFormData(prev => ({
+        ...prev,
+        packageId: selectedPkg._id,
+        packageName: selectedPkg.name,
+        totalAmount: selectedPkg.price ? selectedPkg.price.toString() : prev.totalAmount
+      }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onClose();
+    setLoading(true);
+
+    try {
+      // Prepare payload for backend
+      // Backend expects: packageId, packageName, travelers, tripDate, totalPrice, contactPhone, specialRequests
+      // We also need to handle custom destination bookings which might not have a packageId
+      
+      const payload = {
+        // Required Backend Fields
+        packageId: formData.packageId || 'custom-booking',
+        packageName: formData.tripType === 'package' ? formData.packageName : `Custom Trip: ${formData.destination}`,
+        packageImage: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop', // Placeholder
+        travelers: parseInt(formData.adults) + parseInt(formData.children),
+        tripDate: formData.startDate,
+        totalPrice: Number(formData.totalAmount),
+        contactPhone: formData.customerPhone,
+        specialRequests: formData.specialRequests,
+        
+        // Admin Specific Fields (Might need backend schema update or store in specialRequests/notes)
+        // For now, we are mapping to existing standard fields. 
+        // Ideally backend should support customerName, email directly in Booking model or create a generic User.
+        // Current Backend: assumes `user` (ObjectId) exists for logged in user. 
+        // OR we can create a "Walk-in Customer" user or update backend to allow no-user bookings.
+        // For this iteration, we will send these as part of "contact" info or assume backend can handle it.
+        
+        // Extended payload if backend supports it (or ignored)
+        customerName: formData.customerName,
+        customerEmail: formData.customerEmail,
+        paymentStatus: formData.paymentStatus,
+        paymentMethod: formData.paymentMode,
+        paymentId: formData.transactionId,
+        status: formData.bookingStatus,
+      };
+
+      await createManualBooking(payload);
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || 'Failed to create booking');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -130,17 +203,16 @@ export function BookingForm({ onClose, initialData }) {
              <div className="space-y-2">
              <Label htmlFor="packageName">Select Package</Label>
              <Select 
-               value={formData.packageName} 
-               onValueChange={(val) => handleChange('packageName', val)}
+               value={formData.packageId} 
+               onValueChange={handlePackageChange}
              >
                <SelectTrigger>
                  <SelectValue placeholder="Choose a package" />
                </SelectTrigger>
                <SelectContent>
-                 <SelectItem value="golden-triangle">Golden Triangle Tour</SelectItem>
-                 <SelectItem value="kerala-bliss">Kerala Bliss</SelectItem>
-                 <SelectItem value="kashmir-paradise">Kashmir Paradise</SelectItem>
-                 <SelectItem value="puri-jagannath">Puri Jagannath Dham</SelectItem>
+                 {packages.map(pkg => (
+                    <SelectItem key={pkg._id} value={pkg._id}>{pkg.name}</SelectItem>
+                 ))}
                </SelectContent>
              </Select>
            </div>
@@ -163,6 +235,7 @@ export function BookingForm({ onClose, initialData }) {
               type="date"
               value={formData.startDate}
               onChange={(e) => handleChange('startDate', e.target.value)}
+              required
             />
           </div>
            <div className="space-y-2">
@@ -218,7 +291,7 @@ export function BookingForm({ onClose, initialData }) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="totalAmount">Total Booking Amount (₹)</Label>
+            <Label htmlFor="totalAmount">Total Booking Amount (₹) *</Label>
             <Input 
               id="totalAmount" 
               type="number"
@@ -226,6 +299,7 @@ export function BookingForm({ onClose, initialData }) {
               value={formData.totalAmount}
               onChange={(e) => handleChange('totalAmount', e.target.value)}
               className="font-semibold"
+              required
             />
           </div>
            <div className="space-y-2">
@@ -293,10 +367,15 @@ export function BookingForm({ onClose, initialData }) {
 
       {/* Actions */}
       <div className="flex justify-end gap-3 sticky bottom-0 bg-background pt-4 border-t border-border mt-6">
-        <Button type="button" variant="outline" onClick={onClose}>
+        <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
           Cancel
         </Button>
-        <Button type="submit" className="bg-gradient-primary hover:opacity-90 text-white shadow-lg shadow-primary/20">
+        <Button 
+          type="submit" 
+          disabled={loading}
+          className="bg-gradient-primary hover:opacity-90 text-white shadow-lg shadow-primary/20"
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
           Create Booking
         </Button>
       </div>

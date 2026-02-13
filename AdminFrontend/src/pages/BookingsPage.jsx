@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Search,
@@ -8,6 +8,8 @@ import {
   Users,
   IndianRupee,
   Plus,
+  Loader2,
+  Filter
 } from 'lucide-react';
 import { Button } from '@/components/ui/Primitives';
 import { Input } from '@/components/ui/Primitives';
@@ -33,9 +35,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/Layout';
-import { mockBookings } from '@/data/mockData';
 import { BookingDetail } from '@/components/admin/BookingDetail';
 import { BookingForm } from '@/components/admin/forms/BookingForm';
+import { getAllBookings, updateBookingStatus, deleteBooking } from '@/services/bookingService';
+import { sonnerToast as toast } from '@/components/ui/Interactive';
 
 const statusColors = {
   pending: 'badge-pending',
@@ -52,19 +55,76 @@ const paymentStatusColors = {
 };
 
 export default function BookingsPage() {
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 1 });
 
-  const filteredBookings = mockBookings.filter((booking) => {
+  const fetchBookings = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllBookings(pagination.page, pagination.limit);
+      setBookings(data.bookings);
+      setPagination(prev => ({ ...prev, total: data.count, pages: data.pages }));
+    } catch (error) {
+      toast.error(error.message || 'Failed to fetch bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, [pagination.page]); // Refetch when page changes
+
+  const handleStatusUpdate = async (id, newStatus) => {
+    try {
+      await updateBookingStatus(id, { status: newStatus });
+      toast.success(`Booking marked as ${newStatus}`);
+      fetchBookings(); // Refresh list
+    } catch (error) {
+      toast.error('Failed to update status');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this booking? This action cannot be undone.')) {
+      try {
+        await deleteBooking(id);
+        toast.success('Booking deleted successfully');
+        fetchBookings();
+      } catch (error) {
+        toast.error('Failed to delete booking');
+      }
+    }
+  };
+
+  const handleBookingCreated = () => {
+    setIsAddBookingOpen(false);
+    fetchBookings();
+    toast.success('Booking created successfully');
+  };
+
+  const filteredBookings = bookings.filter((booking) => {
+    const searchLower = searchQuery.toLowerCase();
     const matchesSearch = 
-      booking.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.packageName.toLowerCase().includes(searchQuery.toLowerCase());
+      (booking.user?.name || booking.contactName || 'Guest')?.toLowerCase().includes(searchLower) ||
+      booking._id.toLowerCase().includes(searchLower) ||
+      booking.packageName.toLowerCase().includes(searchLower);
     const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  if (loading && bookings.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -106,6 +166,7 @@ export default function BookingsPage() {
         
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full sm:w-[180px]">
+             <Filter className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -143,29 +204,31 @@ export default function BookingsPage() {
             <tbody>
               {filteredBookings.map((booking, index) => (
                 <motion.tr
-                  key={booking.id}
+                  key={booking._id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 + index * 0.03 }}
                 >
                   <td>
-                    <span className="font-medium text-foreground">{booking.id}</span>
+                    <span className="font-medium text-foreground text-xs font-mono">
+                      {booking._id.substring(0, 8)}...
+                    </span>
                   </td>
                   <td>
                     <div>
-                      <p className="font-medium text-foreground">{booking.customerName}</p>
-                      <p className="text-xs text-muted-foreground">{booking.customerEmail}</p>
+                      <p className="font-medium text-foreground">{booking.user?.name || booking.contactName || 'Guest'}</p>
+                      <p className="text-xs text-muted-foreground">{booking.user?.email || booking.contactEmail || '-'}</p>
                     </div>
                   </td>
                   <td>
                     <div>
                       <p className="font-medium text-foreground line-clamp-1">{booking.packageName}</p>
-                      <p className="text-xs text-muted-foreground">{booking.destination}</p>
+                      <p className="text-xs text-muted-foreground">{booking.selectedHotels?.length ? `${booking.selectedHotels.length} Hotels` : 'No Hotels'}</p>
                     </div>
                   </td>
                   <td>
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span>{new Date(booking.tripDate).toLocaleDateString('en-IN', { 
                         day: 'numeric', month: 'short', year: 'numeric' 
                       })}</span>
@@ -180,7 +243,7 @@ export default function BookingsPage() {
                   <td>
                     <div className="flex items-center gap-1 font-semibold text-foreground">
                       <IndianRupee className="h-4 w-4" />
-                      {booking.totalPrice.toLocaleString('en-IN')}
+                      {booking.totalPrice?.toLocaleString('en-IN')}
                     </div>
                   </td>
                   <td>
@@ -189,8 +252,8 @@ export default function BookingsPage() {
                     </Badge>
                   </td>
                   <td>
-                    <Badge className={paymentStatusColors[booking.paymentStatus]}>
-                      {booking.paymentStatus.charAt(0).toUpperCase() + booking.paymentStatus.slice(1)}
+                    <Badge className={paymentStatusColors[booking.paymentStatus || 'pending']}>
+                      {(booking.paymentStatus || 'pending').charAt(0).toUpperCase() + (booking.paymentStatus || 'pending').slice(1)}
                     </Badge>
                   </td>
                   <td>
@@ -209,15 +272,42 @@ export default function BookingsPage() {
                           View Details
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="cursor-pointer">
-                          Mark as Confirmed
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer">
-                          Mark as Completed
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer text-destructive">
-                          Cancel Booking
-                        </DropdownMenuItem>
+                        
+                        {booking.status !== 'confirmed' && (
+                           <DropdownMenuItem 
+                            className="cursor-pointer"
+                            onClick={() => handleStatusUpdate(booking._id, 'confirmed')}
+                          >
+                            Mark as Confirmed
+                          </DropdownMenuItem>
+                        )}
+                        
+                        {booking.status === 'confirmed' && (
+                           <DropdownMenuItem 
+                            className="cursor-pointer"
+                            onClick={() => handleStatusUpdate(booking._id, 'completed')}
+                          >
+                            Mark as Completed
+                          </DropdownMenuItem>
+                        )}
+
+                        {booking.status !== 'cancelled' && (
+                           <DropdownMenuItem 
+                             className="cursor-pointer text-destructive"
+                             onClick={() => handleStatusUpdate(booking._id, 'cancelled')}
+                           >
+                             Cancel Booking
+                           </DropdownMenuItem>
+                        )}
+                         
+                         <DropdownMenuSeparator />
+                         <DropdownMenuItem 
+                           className="cursor-pointer text-destructive focus:bg-destructive/10"
+                           onClick={() => handleDelete(booking._id)}
+                         >
+                            Delete Permanently
+                         </DropdownMenuItem>
+
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>
@@ -252,7 +342,7 @@ export default function BookingsPage() {
             <DialogTitle className="font-display text-xl">Create Manual Booking</DialogTitle>
             <DialogDescription>Enter customer and trip details to create a new booking.</DialogDescription>
           </DialogHeader>
-          <BookingForm onClose={() => setIsAddBookingOpen(false)} />
+          <BookingForm onClose={() => setIsAddBookingOpen(false)} onSuccess={handleBookingCreated} />
         </DialogContent>
       </Dialog>
     </div>

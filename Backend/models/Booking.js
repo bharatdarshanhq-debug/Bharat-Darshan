@@ -5,7 +5,13 @@ const bookingSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      // required: true, // Made optional for manual bookings
+    },
+    contactName: {
+      type: String,
+    },
+    contactEmail: {
+      type: String,
     },
     packageId: {
       type: String, 
@@ -14,6 +20,10 @@ const bookingSchema = new mongoose.Schema(
     packageName: {
       type: String,
       required: true,
+    },
+    destination: {
+      type: String,
+      required: true, 
     },
     packageImage: {
       type: String,
@@ -93,6 +103,10 @@ const bookingSchema = new mongoose.Schema(
       hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },
       hotelName: { type: String, required: true },
     }],
+    isReadByAdmin: {
+      type: Boolean,
+      default: false
+    }
   },
   {
     timestamps: true,

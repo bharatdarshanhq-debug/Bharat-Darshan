@@ -1,8 +1,3 @@
-/**
- * Package API Service for Admin Frontend
- * Handles all package CRUD operations with the backend API
- */
-
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 /**

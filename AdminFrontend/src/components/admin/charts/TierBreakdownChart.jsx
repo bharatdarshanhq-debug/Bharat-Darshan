@@ -17,7 +17,8 @@ const tierGradients = {
   Elite: 'from-accent/20 to-accent/5',
 };
 
-export function TierBreakdownChart() {
+export function TierBreakdownChart({ data }) {
+  const chartData = data || [];
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -31,7 +32,7 @@ export function TierBreakdownChart() {
       </div>
       
       <div className="space-y-4">
-        {bookingsByTier.map((item, index) => (
+        {chartData.map((item, index) => (
           <motion.div
             key={item.tier}
             initial={{ opacity: 0, x: -20 }}

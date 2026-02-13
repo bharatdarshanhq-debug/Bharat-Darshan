@@ -28,6 +28,7 @@ app.use('/api/hotels', require('./routes/hotelRoutes'));
 app.use('/api/states', require('./routes/stateRoutes'));
 app.use('/api/faqs', require('./routes/faqRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/admin/dashboard', require('./routes/dashboardRoutes'));
 
 
 app.get('/api/health', (req, res) => {

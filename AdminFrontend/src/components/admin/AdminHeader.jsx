@@ -2,6 +2,9 @@ import { Bell, Search, User } from 'lucide-react';
 import { Input } from '@/components/ui/Primitives';
 import { Button } from '@/components/ui/Primitives';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
+import dashboardService from '@/services/dashboardService';
 import adminAuthService from '@/services/adminAuthService';
 import {
   DropdownMenu,
@@ -16,6 +19,43 @@ import { Badge } from '@/components/ui/Primitives';
 
 export function AdminHeader() {
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const data = await dashboardService.getNotifications();
+        if (data.success) {
+          setNotifications(data.data.notifications);
+          setUnreadCount(data.data.unreadCount);
+        }
+      } catch (err) {
+        console.error('Failed to fetch notifications:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  const handleNotificationClick = async (notification) => {
+    if (!notification.read) {
+      try {
+        await dashboardService.markNotificationAsRead(notification.id);
+        
+        // Update local state
+        setNotifications(prev => 
+          prev.map(n => n.id === notification.id ? { ...n, read: true } : n)
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      } catch (err) {
+        console.error('Failed to mark notification as read:', err);
+      }
+    }
+  };
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
@@ -41,28 +81,46 @@ export function AdminHeader() {
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button variant="ghost" size="icon" className={`relative ${unreadCount > 0 ? 'border-2 border-primary' : ''}`}>
               <Bell className="h-5 w-5 text-muted-foreground" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground">
-                3
-              </Badge>
+              {unreadCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground">
+                  {unreadCount}
+                </Badge>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
             <DropdownMenuLabel className="font-display">Notifications</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer">
-              <span className="font-medium text-sm">New booking received</span>
-              <span className="text-xs text-muted-foreground">Golden Triangle Tour - 5 min ago</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer">
-              <span className="font-medium text-sm">Payment confirmed</span>
-              <span className="text-xs text-muted-foreground">Booking BK003 - 1 hour ago</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer">
-              <span className="font-medium text-sm">New inquiry</span>
-              <span className="text-xs text-muted-foreground">Custom Ladakh Package - 15 min ago</span>
-            </DropdownMenuItem>
+            <div className="max-h-[300px] overflow-y-auto">
+              {loading ? (
+                 <div className="p-4 text-center text-xs text-muted-foreground">Loading...</div>
+              ) : notifications.length > 0 ? (
+                notifications.map((notification) => (
+                  <DropdownMenuItem 
+                    key={notification.id} 
+                    className={`flex flex-col items-start gap-1 cursor-pointer ${!notification.read ? 'bg-muted/50' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault(); 
+                      handleNotificationClick(notification);
+                    }}
+                  >
+                    <div className="flex w-full justify-between items-center">
+                      <span className={`text-sm ${!notification.read ? 'font-semibold text-primary' : 'font-medium'}`}>
+                        {notification.title}
+                      </span>
+                      {!notification.read && <span className="h-2 w-2 rounded-full bg-primary" />}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {notification.message} - {formatDistanceToNow(new Date(notification.time), { addSuffix: true })}
+                    </span>
+                  </DropdownMenuItem>
+                ))
+              ) : (
+                <div className="p-4 text-center text-xs text-muted-foreground">No new notifications</div>
+              )}
+            </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-center text-primary cursor-pointer">
               View all notifications

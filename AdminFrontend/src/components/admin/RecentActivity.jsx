@@ -29,7 +29,8 @@ const getActivityColor = (type) => {
   }
 };
 
-export function RecentActivity() {
+export function RecentActivity({ data }) {
+  const activityData = data || [];
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -39,7 +40,7 @@ export function RecentActivity() {
     >
       <h3 className="text-lg font-semibold font-display text-foreground mb-4">Recent Activity</h3>
       <div className="space-y-4">
-        {recentActivity.map((activity, index) => {
+        {activityData.map((activity, index) => {
           const Icon = getActivityIcon(activity.type);
           const colorClass = getActivityColor(activity.type);
           

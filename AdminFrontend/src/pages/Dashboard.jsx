@@ -8,16 +8,20 @@ import {
   MapPin,
   Globe,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { StatCard } from '@/components/admin/StatCard';
 import { RecentActivity } from '@/components/admin/RecentActivity';
 import { BookingsChart } from '@/components/admin/charts/BookingsChart';
 import { RevenueChart } from '@/components/admin/charts/RevenueChart';
 import { DestinationChart } from '@/components/admin/charts/DestinationChart';
 import { TierBreakdownChart } from '@/components/admin/charts/TierBreakdownChart';
-import { mockDashboardStats } from '@/data/mockData';
+import dashboardService from '@/services/dashboardService';
 
 const formatCurrency = (value) => {
-  if (value === 0) return '₹0';
+  if (value === 0 || value === undefined) return '₹0';
+  if (value >= 10000000) { // Crores
+     return `₹${(value / 10000000).toFixed(2)}Cr`;
+  }
   if (value >= 100000) {
     return `₹${(value / 100000).toFixed(1)}L`;
   }
@@ -25,6 +29,57 @@ const formatCurrency = (value) => {
 };
 
 export default function Dashboard() {
+  const [stats, setStats] = useState({
+    websiteVisits: 0,
+    totalBookings: 0,
+    activeHotels: 0,
+    activePackages: 0,
+    activeDestinations: 0,
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+    recentActivity: [],
+    upcomingTrips: [],
+    bookingsByMonth: [],
+    bookingsByTier: [],
+    bookingsByDestination: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await dashboardService.getStats();
+        if (data.success) {
+          setStats(data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch dashboard stats:', err);
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px] text-destructive">
+        {error}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -41,7 +96,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Website Visited"
-          value={mockDashboardStats.websiteVisits?.toLocaleString() || '12,450'}
+          value={stats.websiteVisits?.toLocaleString() || '11,000'}
           change="+24% this week"
           changeType="positive"
           icon={Globe}
@@ -50,7 +105,7 @@ export default function Dashboard() {
         />
         <StatCard
           title="Booking Attempts"
-          value={mockDashboardStats.totalBookings}
+          value={stats.totalBookings}
           change="+12% from last month"
           changeType="positive"
           icon={CalendarCheck}
@@ -59,7 +114,7 @@ export default function Dashboard() {
         />
         <StatCard
           title="Total Revenue"
-          value={formatCurrency(mockDashboardStats.totalRevenue)}
+          value={formatCurrency(stats.totalRevenue)}
           change="+0% YoY"
           changeType="neutral"
           icon={IndianRupee}
@@ -68,8 +123,8 @@ export default function Dashboard() {
         />
         <StatCard
           title="This Month Revenue"
-          value={formatCurrency(mockDashboardStats.monthlyRevenue)}
-          change="No revenue yet"
+          value={formatCurrency(stats.monthlyRevenue)}
+          change="current month"
           changeType="neutral"
           icon={TrendingUp}
           iconColor="text-primary"
@@ -77,8 +132,8 @@ export default function Dashboard() {
         />
         <StatCard
           title="Active Packages"
-          value={mockDashboardStats.activePackages}
-          change="3 new this month"
+          value={stats.activePackages}
+          change="Available to book"
           changeType="neutral"
           icon={Package}
           iconColor="text-secondary"
@@ -86,8 +141,8 @@ export default function Dashboard() {
         />
         <StatCard
           title="Active Destinations"
-          value={mockDashboardStats.activeDestinations}
-          change="All regions covered"
+          value={stats.activeDestinations}
+          change="Across India"
           changeType="neutral"
           icon={MapPin}
           iconColor="text-info"
@@ -95,7 +150,7 @@ export default function Dashboard() {
         />
         <StatCard
           title="Active Hotels"
-          value={mockDashboardStats.activeHotels}
+          value={stats.activeHotels}
           change="Premium partnerships"
           changeType="neutral"
           icon={Building2}
@@ -106,19 +161,19 @@ export default function Dashboard() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <BookingsChart />
-        <RevenueChart />
+        <BookingsChart data={stats.bookingsByMonth} />
+        <RevenueChart data={stats.bookingsByMonth} />
       </div>
 
       {/* Second Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DestinationChart />
-        <TierBreakdownChart />
+        <DestinationChart data={stats.bookingsByDestination} />
+        <TierBreakdownChart data={stats.bookingsByTier} />
       </div>
 
       {/* Activity Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentActivity />
+        <RecentActivity data={stats.recentActivity} />
         
         {/* Upcoming Trips */}
         <motion.div
@@ -129,28 +184,34 @@ export default function Dashboard() {
         >
           <h3 className="text-lg font-semibold font-display text-foreground mb-4">Upcoming Trips</h3>
           <div className="space-y-3">
-            {[
-              { id: 'BK001', customer: 'Rahul Sharma', package: 'Golden Triangle', date: 'Feb 15, 2024', travelers: 4 },
-              { id: 'BK002', customer: 'Priya Patel', package: 'Kerala Backwaters', date: 'Feb 20, 2024', travelers: 2 },
-              { id: 'BK003', customer: 'Amit Kumar', package: 'Rajasthan Heritage', date: 'Mar 01, 2024', travelers: 6 },
-            ].map((trip, index) => (
-              <motion.div
-                key={trip.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: 0.6 + index * 0.1 }}
-                className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-              >
-                <div>
-                  <p className="font-medium text-sm text-foreground">{trip.customer}</p>
-                  <p className="text-xs text-muted-foreground">{trip.package}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-foreground">{trip.date}</p>
-                  <p className="text-xs text-muted-foreground">{trip.travelers} travelers</p>
-                </div>
-              </motion.div>
-            ))}
+             {stats.upcomingTrips && stats.upcomingTrips.length > 0 ? (
+               stats.upcomingTrips.map((trip, index) => (
+                <motion.div
+                  key={trip._id}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.6 + index * 0.1 }}
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                >
+                  <div>
+                    <p className="font-medium text-sm text-foreground">{trip.customerName}</p>
+                    <p className="text-xs text-muted-foreground">{trip.packageName}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-foreground">
+                      {new Date(trip.tripDate).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{trip.travelers} travelers</p>
+                  </div>
+                </motion.div>
+              ))
+             ) : (
+               <p className="text-sm text-muted-foreground">No upcoming trips scheduled.</p>
+             )}
           </div>
         </motion.div>
       </div>
