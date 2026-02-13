@@ -106,6 +106,8 @@ const Contact = () => {
         body: JSON.stringify(formData),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
         throw new Error(data.error || 'Something went wrong');
       }
@@ -482,7 +484,6 @@ const Contact = () => {
           </div>
         </section>
       </main>
-
       <Footer />
     </div>
   );

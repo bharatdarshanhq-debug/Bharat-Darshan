@@ -14,3 +14,11 @@ enabled = true
   [analyzers.meta]
   plugins = ["react"]
   environment = ["nodejs", "browser"]
+  skip_doc_coverage = true
+
+test_patterns = [
+  "**/test/**", 
+  "**/tests/**", 
+  "**/*.test.js", 
+  "**/*.spec.js"
+]
