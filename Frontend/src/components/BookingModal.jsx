@@ -70,6 +70,7 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2 
         packageId: pkg.legacyId || pkg._id,
         packageName: pkg.name,
         packageImage: pkg.image,
+        destination: pkg.primaryDestination,
         travelers,
         tripDate: new Date(tripDate).toISOString(),
         totalPrice,
