@@ -350,8 +350,6 @@ const createPackage = async (req, res) => {
       packageData.images = uploadedImages.images;
     }
 
-    console.log('Creating package with data:', JSON.stringify(packageData, null, 2));
-
     // Create the package
     const pkg = await Package.create(packageData);
 

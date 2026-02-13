@@ -69,7 +69,7 @@ exports.getDashboardStats = async (req, res) => {
 
     // 5. Recent Activity (Last 5 Bookings)
     const recentBookings = await Booking.find()
-      .select('customerName packageName status createdAt totalPrice')
+      .select('contactName packageName status createdAt totalPrice')
       .sort({ createdAt: -1 })
       .limit(5)
       .lean();
@@ -78,8 +78,8 @@ exports.getDashboardStats = async (req, res) => {
     const recentActivity = recentBookings.map(booking => ({
       id: booking._id,
       type: 'booking',
-      message: `Booking received for ${booking.packageName} by ${booking.customerName || 'Guest'}`,
-      time: booking.createdAt, // Frontend will format relative time
+      message: `Booking received for ${booking.packageName} by ${booking.contactName || 'Guest'}`,
+      time: booking.createdAt,
       status: booking.status,
       amount: booking.totalPrice
     }));
@@ -89,7 +89,7 @@ exports.getDashboardStats = async (req, res) => {
       tripDate: { $gte: new Date() },
       status: { $in: ['confirmed', 'completed'] }
     })
-    .select('customerName packageName tripDate travelers')
+    .select('contactName packageName tripDate travelers')
     .sort({ tripDate: 1 })
     .limit(5)
     .lean();

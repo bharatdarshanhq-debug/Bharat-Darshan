@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { Upload, X } from 'lucide-react';
-import { Button, Input, Label, Textarea, Switch, Checkbox, Separator } from '@/components/ui/Primitives';
+import { Button } from '@/components/ui/Primitives';
+import { Input } from '@/components/ui/Primitives';
+import { Label } from '@/components/ui/Primitives';
+import { Textarea } from '@/components/ui/Primitives';
+import { Switch } from '@/components/ui/Primitives';
+import { Checkbox } from '@/components/ui/Primitives';
 import {
   Select,
   SelectContent,
@@ -8,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/Interactive';
-
+import { Separator } from '@/components/ui/Primitives';
 
 const tiers = ['Lite', 'Standard', 'Pro', 'Premium', 'Elite'];
 
