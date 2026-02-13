@@ -223,7 +223,7 @@ const createPackage = async (req, res) => {
       if (typeof field === 'string') {
         try {
           return JSON.parse(field);
-        } catch {
+        } catch (_e) {
           return field;
         }
       }
@@ -292,8 +292,8 @@ const createPackage = async (req, res) => {
           if (typeof parsed === 'object' && parsed !== null) {
             return [parsed];
           }
-        } catch {
-          // Not JSON - treat as a plain text hotel name (e.g. "4 Star Hotel")
+        } catch (_e) {
+          // Not JSON - treat as a plain text hotel name
         }
         
         // Plain string fallback - create a default entry
@@ -393,7 +393,7 @@ const updatePackage = async (req, res) => {
       if (typeof field === 'string') {
         try {
           return JSON.parse(field);
-        } catch {
+        } catch (_e) {
           return field;
         }
       }
@@ -451,8 +451,8 @@ const updatePackage = async (req, res) => {
           if (typeof parsed === 'object' && parsed !== null) {
             return [parsed];
           }
-        } catch {
-          // Not JSON - treat as a plain text hotel name (e.g. "4 Star Hotel")
+        } catch (_e) {
+          // Not JSON - treat as a plain text hotel name
         }
         
         // Plain string fallback - create a default entry

@@ -36,7 +36,7 @@ const PackageDetail = () => {
         if (packageData.hotelDetails && typeof packageData.hotelDetails === 'string') {
           try {
             packageData.hotelDetails = JSON.parse(packageData.hotelDetails);
-          } catch {
+          } catch (_e) {
             packageData.hotelDetails = [];
           }
         }
@@ -51,7 +51,7 @@ const PackageDetail = () => {
                 if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].hotel) {
                   hotelName = parsed[0].hotel;
                 }
-              } catch {
+              } catch (_e) {
                 // keep original
               }
             }
