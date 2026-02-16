@@ -229,6 +229,117 @@ const getPaymentStatus = async (req, res) => {
 };
 
 /**
+ * @desc    Process refund via Razorpay for a cancelled booking
+ * @route   POST /api/bookings/:id/process-refund
+ * @access  Private/Admin
+ */
+const processRefund = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ success: false, error: 'Booking not found' });
+    }
+
+    // Only cancelled bookings can be refunded
+    if (booking.status !== 'cancelled') {
+      return res.status(400).json({
+        success: false,
+        error: 'Only cancelled bookings can be refunded',
+      });
+    }
+
+    // Check if already refunded
+    if (booking.refundStatus === 'completed') {
+      return res.status(400).json({
+        success: false,
+        error: 'Refund has already been processed for this booking',
+      });
+    }
+
+    // Check if there's an amount to refund
+    if (!booking.refundAmount || booking.refundAmount <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No refund amount to process (refund amount is 0)',
+      });
+    }
+
+    // Check if payment was made
+    if (!booking.paymentId) {
+      // No payment was made — just mark as completed
+      booking.refundStatus = 'completed';
+      booking.refundProcessedAt = new Date();
+      await booking.save();
+      return res.json({
+        success: true,
+        message: 'No payment was made for this booking. Refund marked as completed.',
+        booking,
+      });
+    }
+
+    // Check if Razorpay is initialized
+    if (!razorpay) {
+      // Razorpay not configured — mark refund as pending for manual processing
+      booking.refundStatus = 'pending';
+      await booking.save();
+      return res.json({
+        success: true,
+        message: 'Razorpay not configured. Refund marked as pending for manual processing.',
+        booking,
+      });
+    }
+
+    // Process refund via Razorpay
+    try {
+      booking.refundStatus = 'processing';
+      await booking.save();
+
+      const refundAmountInPaise = Math.round(booking.refundAmount * 100);
+      const refund = await razorpay.payments.refund(booking.paymentId, {
+        amount: refundAmountInPaise,
+        notes: {
+          bookingId: booking._id.toString(),
+          reason: booking.cancellationReason || 'Booking cancelled',
+        },
+      });
+
+      // Update booking with refund details
+      booking.refundId = refund.id;
+      booking.refundStatus = 'completed';
+      booking.refundProcessedAt = new Date();
+      booking.paymentStatus = (booking.refundAmount < booking.totalPrice) ? 'partially_refunded' : 'refunded';
+      await booking.save();
+
+      res.json({
+        success: true,
+        message: 'Refund processed successfully',
+        booking,
+        refund: {
+          id: refund.id,
+          amount: refund.amount / 100,
+          status: refund.status,
+        },
+      });
+    } catch (razorpayError) {
+      // Refund failed — update status
+      booking.refundStatus = 'failed';
+      await booking.save();
+      
+      console.error('Razorpay refund error:', razorpayError);
+      return res.status(500).json({
+        success: false,
+        error: `Razorpay refund failed: ${razorpayError.message}`,
+        booking,
+      });
+    }
+  } catch (error) {
+    console.error('Error processing refund:', error);
+    res.status(500).json({ success: false, error: 'Failed to process refund' });
+  }
+};
+
+/**
  * @desc    Get Razorpay key for frontend
  * @route   GET /api/payments/key
  * @access  Public
@@ -245,4 +356,6 @@ module.exports = {
   verifyPayment,
   getPaymentStatus,
   getRazorpayKey,
+  processRefund,
 };
+

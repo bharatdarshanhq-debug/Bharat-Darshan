@@ -71,6 +71,7 @@ const Bookings = () => {
       case "confirmed": return "text-green-500 bg-green-500/10 border-green-500/20";
       case "pending": return "text-yellow-500 bg-yellow-500/10 border-yellow-500/20";
       case "cancelled": return "text-red-500 bg-red-500/10 border-red-500/20";
+      case "cancellation_requested": return "text-orange-500 bg-orange-500/10 border-orange-500/20";
       case "completed": return "text-blue-500 bg-blue-500/10 border-blue-500/20";
       default: return "text-gray-500 bg-gray-500/10 border-gray-500/20";
     }
@@ -80,9 +81,15 @@ const Bookings = () => {
       switch (status) {
           case "confirmed": return <CheckCircle2 className="w-3 h-3" />;
           case "cancelled": return <XCircle className="w-3 h-3" />;
+          case "cancellation_requested": return <Clock className="w-3 h-3" />;
           default: return <Clock className="w-3 h-3" />;
       }
   }
+
+  const getStatusLabel = (status) => {
+    if (status === 'cancellation_requested') return 'Cancel Requested';
+    return status;
+  };
 
   if (isLoading) {
     return (
@@ -161,7 +168,7 @@ const Bookings = () => {
                             <div>
                                 <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold mb-3 uppercase tracking-wider border ${getStatusColor(booking.status)}`}>
                                     {getStatusIcon(booking.status)}
-                                    {booking.status}
+                                    {getStatusLabel(booking.status)}
                                 </div>
                                 <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
                                     {booking.packageName}

@@ -6,8 +6,13 @@ const {
   getBookingById,
   updateBookingHotels,
   updateBookingStatus,
+  getRefundPreview,
+  requestCancellation,
+  approveCancellation,
+  rejectCancellation,
   deleteBooking,
 } = require('../controllers/bookingController');
+const { processRefund } = require('../controllers/paymentController');
 const { protect } = require('../middleware/authMiddleware');
 
 router.route('/')
@@ -15,7 +20,8 @@ router.route('/')
   .get(protect, getBookings);
 
 router.route('/:id')
-  .get(protect, getBookingById);
+  .get(protect, getBookingById)
+  .delete(protect, deleteBooking);
 
 router.route('/:id/hotels')
   .put(protect, updateBookingHotels);
@@ -23,8 +29,12 @@ router.route('/:id/hotels')
 router.route('/:id/status')
   .put(protect, updateBookingStatus);
 
-router.route('/:id')
-  .get(protect, getBookingById)
-  .delete(protect, deleteBooking);
+// Cancellation & Refund routes
+router.get('/:id/refund-preview', protect, getRefundPreview);
+router.put('/:id/request-cancel', protect, requestCancellation);
+router.put('/:id/approve-cancel', protect, approveCancellation);
+router.put('/:id/reject-cancel', protect, rejectCancellation);
+router.post('/:id/process-refund', protect, processRefund);
 
 module.exports = router;
+

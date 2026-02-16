@@ -46,8 +46,8 @@ export function BookingForm({ onClose, initialData, onSuccess }) {
     // Fetch packages for dropdown
     const fetchPackages = async () => {
       try {
-        const data = await fetchAllPackages(1, 100); // Fetch mostly all packages
-        setPackages(data.packages || []);
+        const data = await fetchAllPackages();
+        setPackages(Array.isArray(data) ? data : (data.packages || []));
       } catch (error) {
         console.error('Failed to fetch packages', error);
       }
@@ -66,6 +66,7 @@ export function BookingForm({ onClose, initialData, onSuccess }) {
         ...prev,
         packageId: selectedPkg._id,
         packageName: selectedPkg.name,
+        destination: selectedPkg.primaryDestination || selectedPkg.name,
         totalAmount: selectedPkg.price ? selectedPkg.price.toString() : prev.totalAmount
       }));
     }
@@ -76,31 +77,26 @@ export function BookingForm({ onClose, initialData, onSuccess }) {
     setLoading(true);
 
     try {
-      // Prepare payload for backend
-      // Backend expects: packageId, packageName, travelers, tripDate, totalPrice, contactPhone, specialRequests
-      // We also need to handle custom destination bookings which might not have a packageId
-      
+      // Build destination: for packages use stored destination, for custom trips use the manual input
+      const resolvedDestination = formData.tripType === 'package'
+        ? (formData.destination || formData.packageName)
+        : formData.destination;
+
       const payload = {
         // Required Backend Fields
         packageId: formData.packageId || 'custom-booking',
         packageName: formData.tripType === 'package' ? formData.packageName : `Custom Trip: ${formData.destination}`,
-        packageImage: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop', // Placeholder
+        packageImage: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop',
         travelers: parseInt(formData.adults) + parseInt(formData.children),
         tripDate: formData.startDate,
         totalPrice: Number(formData.totalAmount),
+        destination: resolvedDestination,
         contactPhone: formData.customerPhone,
         specialRequests: formData.specialRequests,
-        
-        // Admin Specific Fields (Might need backend schema update or store in specialRequests/notes)
-        // For now, we are mapping to existing standard fields. 
-        // Ideally backend should support customerName, email directly in Booking model or create a generic User.
-        // Current Backend: assumes `user` (ObjectId) exists for logged in user. 
-        // OR we can create a "Walk-in Customer" user or update backend to allow no-user bookings.
-        // For this iteration, we will send these as part of "contact" info or assume backend can handle it.
-        
-        // Extended payload if backend supports it (or ignored)
-        customerName: formData.customerName,
-        customerEmail: formData.customerEmail,
+
+        // Map to backend field names (contactName / contactEmail)
+        contactName: formData.customerName,
+        contactEmail: formData.customerEmail,
         paymentStatus: formData.paymentStatus,
         paymentMethod: formData.paymentMode,
         paymentId: formData.transactionId,

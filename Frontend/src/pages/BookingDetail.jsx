@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Calendar, MapPin, ArrowLeft, Loader2, Users, Phone, 
-  MessageSquare, CreditCard, Clock, CheckCircle2, XCircle, Printer
+  Calendar, ArrowLeft, Loader2, Users, Phone, 
+  MessageSquare, CreditCard, Clock, CheckCircle2, XCircle, Printer,
+  AlertTriangle, RefreshCcw, Ban
 } from "lucide-react";
 import { Button } from "@/components/ui/forms";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { getRefundPreview, requestCancellation } from "@/services/packageService";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const API_URL = API_BASE.includes('/api') ? API_BASE : `${API_BASE.replace(/\/$/, "")}/api`;
@@ -18,6 +20,13 @@ const BookingDetail = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [booking, setBooking] = useState(null);
+
+  // Cancellation state
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [refundPreview, setRefundPreview] = useState(null);
+  const [loadingRefund, setLoadingRefund] = useState(false);
+  const [submittingCancel, setSubmittingCancel] = useState(false);
 
   useEffect(() => {
     fetchBooking();
@@ -53,15 +62,61 @@ const BookingDetail = () => {
     }
   };
 
+  const handleOpenCancelDialog = async () => {
+    setShowCancelDialog(true);
+    setLoadingRefund(true);
+    try {
+      const token = localStorage.getItem("token");
+      const preview = await getRefundPreview(id, token);
+      setRefundPreview(preview);
+    } catch (error) {
+      toast.error(error.message || "Could not load refund details");
+    } finally {
+      setLoadingRefund(false);
+    }
+  };
+
+  const handleSubmitCancellation = async () => {
+    if (!cancelReason.trim()) {
+      toast.error("Please provide a reason for cancellation");
+      return;
+    }
+    setSubmittingCancel(true);
+    try {
+      const token = localStorage.getItem("token");
+      const result = await requestCancellation(id, cancelReason, token);
+      toast.success(result.message || "Cancellation request submitted successfully!");
+      setShowCancelDialog(false);
+      setCancelReason("");
+      fetchBooking(); // Refresh booking data
+    } catch (error) {
+      toast.error(error.message || "Failed to submit cancellation request");
+    } finally {
+      setSubmittingCancel(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "confirmed": return "text-green-500 bg-green-500/10 border-green-500/20";
       case "pending": return "text-yellow-500 bg-yellow-500/10 border-yellow-500/20";
       case "cancelled": return "text-red-500 bg-red-500/10 border-red-500/20";
+      case "cancellation_requested": return "text-orange-500 bg-orange-500/10 border-orange-500/20";
       case "completed": return "text-blue-500 bg-blue-500/10 border-blue-500/20";
       default: return "text-gray-500 bg-gray-500/10 border-gray-500/20";
     }
   };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "cancellation_requested": return "Cancellation Requested";
+      default: return status?.charAt(0).toUpperCase() + status?.slice(1);
+    }
+  };
+
+  const canCancel = booking && ['pending', 'confirmed'].includes(booking.status);
+  const isCancellationRequested = booking?.status === 'cancellation_requested';
+  const isCancelled = booking?.status === 'cancelled';
 
   if (isLoading) {
     return (
@@ -108,7 +163,7 @@ const BookingDetail = () => {
                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                       <div>
                         <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-3 bg-white/20 backdrop-blur-sm border border-white/20 uppercase tracking-wider`}>
-                           {booking.status}
+                           {getStatusLabel(booking.status)}
                         </div>
                         <h2 className="text-2xl md:text-3xl font-bold mb-2">{booking.packageName}</h2>
                         <div className="flex items-center gap-4 text-primary-foreground/80 text-sm">
@@ -177,6 +232,102 @@ const BookingDetail = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Cancellation Request Status Card */}
+                {isCancellationRequested && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-orange-50 dark:bg-orange-950/20 rounded-2xl border-2 border-orange-200 dark:border-orange-800 p-6"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center">
+                        <Clock className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-orange-800 dark:text-orange-300">Cancellation Request Pending</h3>
+                        <p className="text-sm text-orange-600 dark:text-orange-400">Your cancellation request is being reviewed by our team</p>
+                      </div>
+                    </div>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between bg-white/60 dark:bg-black/20 rounded-xl p-3">
+                        <span className="text-muted-foreground">Requested On</span>
+                        <span className="font-medium">{new Date(booking.cancellationRequestedAt).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between bg-white/60 dark:bg-black/20 rounded-xl p-3">
+                        <span className="text-muted-foreground">Reason</span>
+                        <span className="font-medium text-right max-w-[200px]">{booking.cancellationReason}</span>
+                      </div>
+                      {booking.refundAmount > 0 && (
+                        <div className="flex justify-between bg-white/60 dark:bg-black/20 rounded-xl p-3">
+                          <span className="text-muted-foreground">Expected Refund</span>
+                          <span className="font-bold text-green-600">₹{booking.refundAmount.toLocaleString()} ({booking.refundPercentage}%)</span>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Cancelled + Refund Info Card */}
+                {isCancelled && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-red-50 dark:bg-red-950/20 rounded-2xl border-2 border-red-200 dark:border-red-800 p-6"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center">
+                        <XCircle className="w-5 h-5 text-red-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-red-800 dark:text-red-300">Booking Cancelled</h3>
+                        <p className="text-sm text-red-600 dark:text-red-400">
+                          {booking.cancelledAt 
+                            ? `Cancelled on ${new Date(booking.cancelledAt).toLocaleDateString()}`
+                            : "This booking has been cancelled"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-3 text-sm">
+                      {booking.cancellationReason && (
+                        <div className="flex justify-between bg-white/60 dark:bg-black/20 rounded-xl p-3">
+                          <span className="text-muted-foreground">Reason</span>
+                          <span className="font-medium text-right max-w-[200px]">{booking.cancellationReason}</span>
+                        </div>
+                      )}
+                      {booking.refundAmount > 0 && (
+                        <>
+                          <div className="flex justify-between bg-white/60 dark:bg-black/20 rounded-xl p-3">
+                            <span className="text-muted-foreground">Refund Amount</span>
+                            <span className="font-bold text-green-600">₹{booking.refundAmount.toLocaleString()} ({booking.refundPercentage}%)</span>
+                          </div>
+                          <div className="flex justify-between bg-white/60 dark:bg-black/20 rounded-xl p-3">
+                            <span className="text-muted-foreground">Refund Status</span>
+                            <span className={`font-semibold capitalize ${
+                              booking.refundStatus === 'completed' ? 'text-green-600' :
+                              booking.refundStatus === 'processing' ? 'text-blue-600' :
+                              booking.refundStatus === 'failed' ? 'text-red-600' :
+                              'text-yellow-600'
+                            }`}>
+                              {booking.refundStatus === 'none' ? 'No refund' : booking.refundStatus}
+                            </span>
+                          </div>
+                          {booking.refundProcessedAt && (
+                            <div className="flex justify-between bg-white/60 dark:bg-black/20 rounded-xl p-3">
+                              <span className="text-muted-foreground">Refund Processed</span>
+                              <span className="font-medium">{new Date(booking.refundProcessedAt).toLocaleString()}</span>
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {booking.refundAmount === 0 && (
+                        <div className="bg-white/60 dark:bg-black/20 rounded-xl p-3 text-center">
+                          <span className="text-red-600 font-medium">No refund applicable (booking cancelled within 7 days of trip)</span>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
               </motion.div>
 
               {/* Sidebar */}
@@ -209,11 +360,156 @@ const BookingDetail = () => {
                          Download Invoice
                      </Button>
                  )}
+
+                 {/* Cancel Booking Button */}
+                 {canCancel && (
+                   <Button 
+                     variant="outline" 
+                     className="w-full gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:hover:bg-red-950/30"
+                     onClick={handleOpenCancelDialog}
+                   >
+                     <Ban className="w-4 h-4" />
+                     Cancel Booking
+                   </Button>
+                 )}
+
+                 {/* Refund Policy Link */}
+                 <div className="text-center">
+                   <Link to="/refund" className="text-sm text-muted-foreground hover:text-primary transition-colors underline">
+                     View Refund & Cancellation Policy
+                   </Link>
+                 </div>
               </motion.div>
             </div>
           </div>
         </div>
       </main>
+
+      {/* Cancel Booking Confirmation Dialog */}
+      <AnimatePresence>
+        {showCancelDialog && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => !submittingCancel && setShowCancelDialog(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-900 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="bg-red-50 dark:bg-red-950/30 p-6 border-b border-red-100 dark:border-red-900">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center">
+                    <AlertTriangle className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-red-800 dark:text-red-300">Cancel Booking</h3>
+                    <p className="text-sm text-red-600 dark:text-red-400">This action cannot be undone</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 space-y-5">
+                {/* Refund Preview */}
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                  <h4 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                    <RefreshCcw className="w-4 h-4" />
+                    Refund Information
+                  </h4>
+                  {loadingRefund ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                      <span className="ml-2 text-sm text-muted-foreground">Calculating refund...</span>
+                    </div>
+                  ) : refundPreview ? (
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Booking Amount</span>
+                        <span className="font-medium">₹{refundPreview.totalPrice?.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Days Until Trip</span>
+                        <span className="font-medium">{refundPreview.daysUntilTrip} days</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Refund Percentage</span>
+                        <span className={`font-bold ${refundPreview.refundPercentage > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {refundPreview.refundPercentage}%
+                        </span>
+                      </div>
+                      <div className="h-px bg-gray-200 dark:bg-gray-700 my-2" />
+                      <div className="flex justify-between text-base">
+                        <span className="font-semibold">Refund Amount</span>
+                        <span className={`font-bold ${refundPreview.refundAmount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {refundPreview.refundAmount > 0 
+                            ? `₹${refundPreview.refundAmount.toLocaleString()}`
+                            : 'No refund'}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-2">Could not load refund details</p>
+                  )}
+                </div>
+
+                {/* Reason */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <MessageSquare className="w-4 h-4 inline mr-2" />
+                    Reason for Cancellation <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    placeholder="Please tell us why you want to cancel..."
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:border-red-400 focus:ring-2 focus:ring-red-100 outline-none transition-all resize-none text-sm"
+                  />
+                </div>
+
+                {/* Important note */}
+                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 text-xs text-amber-700 dark:text-amber-400">
+                  <strong>Note:</strong> Your cancellation request will be reviewed by our team. The refund (if applicable) will be processed within 5-7 business days after approval.
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 pb-6 flex gap-3">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setShowCancelDialog(false)}
+                  disabled={submittingCancel}
+                >
+                  Keep Booking
+                </Button>
+                <Button 
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  onClick={handleSubmitCancellation}
+                  disabled={submittingCancel || !cancelReason.trim()}
+                >
+                  {submittingCancel ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Cancellation"
+                  )}
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Footer />
     </div>
   );

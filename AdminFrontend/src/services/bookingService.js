@@ -73,3 +73,44 @@ export const deleteBooking = async (id) => {
     throw error.response?.data?.error || 'Failed to delete booking';
   }
 };
+
+// Get refund preview for a booking
+export const getRefundPreview = async (id) => {
+  try {
+    const response = await authAxios.get(`/bookings/${id}/refund-preview`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.error || 'Failed to get refund preview';
+  }
+};
+
+// Approve cancellation request
+export const approveCancellation = async (id, data = {}) => {
+  try {
+    const response = await authAxios.put(`/bookings/${id}/approve-cancel`, data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.error || 'Failed to approve cancellation';
+  }
+};
+
+// Reject cancellation request
+export const rejectCancellation = async (id, data = {}) => {
+  try {
+    const response = await authAxios.put(`/bookings/${id}/reject-cancel`, data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.error || 'Failed to reject cancellation';
+  }
+};
+
+// Process refund via Razorpay
+export const processRefund = async (id) => {
+  try {
+    const response = await authAxios.post(`/bookings/${id}/process-refund`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.error || 'Failed to process refund';
+  }
+};
+

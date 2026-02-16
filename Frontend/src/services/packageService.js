@@ -146,3 +146,39 @@ export const getRazorpayKey = async () => {
   }
   return data.key;
 };
+
+/**
+ * Get refund preview for a booking (no side effects)
+ */
+export const getRefundPreview = async (bookingId, token) => {
+  const response = await fetch(`${API_URL}/api/bookings/${bookingId}/refund-preview`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to get refund preview');
+  }
+  return data.refundPreview;
+};
+
+/**
+ * Request cancellation for a booking
+ */
+export const requestCancellation = async (bookingId, reason, token) => {
+  const response = await fetch(`${API_URL}/api/bookings/${bookingId}/request-cancel`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ reason }),
+  });
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to submit cancellation request');
+  }
+  return data;
+};
+

@@ -1,7 +1,19 @@
 const mongoose = require('mongoose');
 
+// Counter schema for auto-incrementing booking numbers
+const counterSchema = new mongoose.Schema({
+  _id: { type: String, required: true },
+  seq: { type: Number, default: 0 },
+});
+
+const Counter = mongoose.models.Counter || mongoose.model('Counter', counterSchema);
+
 const bookingSchema = new mongoose.Schema(
   {
+    bookingNumber: {
+      type: Number,
+      unique: true,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -49,12 +61,12 @@ const bookingSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'confirmed', 'cancelled', 'completed'],
+      enum: ['pending', 'confirmed', 'cancellation_requested', 'cancelled', 'completed'],
       default: 'pending',
     },
     paymentStatus: {
       type: String,
-      enum: ['pending', 'paid', 'refunded'],
+      enum: ['pending', 'partial', 'paid', 'refunded', 'partially_refunded'],
       default: 'pending',
     },
     contactPhone: {
@@ -74,7 +86,7 @@ const bookingSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ['razorpay', 'upi', 'card', 'netbanking', 'wallet', null],
+      enum: ['razorpay', 'upi', 'card', 'netbanking', 'wallet', 'bank_transfer', 'cash', null],
       default: null,
     },
     paymentDetails: {
@@ -106,11 +118,83 @@ const bookingSchema = new mongoose.Schema(
     isReadByAdmin: {
       type: Boolean,
       default: false
+    },
+    // --- Cancellation & Refund Fields ---
+    cancellationReason: {
+      type: String,
+      default: null,
+    },
+    cancelledAt: {
+      type: Date,
+      default: null,
+    },
+    cancelledBy: {
+      type: String,
+      enum: ['user', 'admin', null],
+      default: null,
+    },
+    cancellationRequestedAt: {
+      type: Date,
+      default: null,
+    },
+    // Refund tracking
+    refundAmount: {
+      type: Number,
+      default: 0,
+    },
+    refundPercentage: {
+      type: Number,
+      default: 0,
+    },
+    refundId: {
+      type: String,
+      default: null,
+    },
+    refundStatus: {
+      type: String,
+      enum: ['none', 'pending', 'processing', 'completed', 'failed'],
+      default: 'none',
+    },
+    refundProcessedAt: {
+      type: Date,
+      default: null,
+    },
+    adminNotes: {
+      type: String,
+      default: null,
     }
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
+// Virtual for TUR-formatted booking ID
+bookingSchema.virtual('bookingId').get(function () {
+  if (this.bookingNumber) {
+    return `TUR${String(this.bookingNumber).padStart(3, '0')}`;
+  }
+  return this._id.toString().substring(0, 8);
+});
+
+// Auto-increment bookingNumber before saving
+bookingSchema.pre('save', async function (next) {
+  if (this.isNew && !this.bookingNumber) {
+    try {
+      const counter = await Counter.findByIdAndUpdate(
+        'bookingNumber',
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
+      this.bookingNumber = counter.seq;
+    } catch (error) {
+      return next(error);
+    }
+  }
+  next();
+});
+
 module.exports = mongoose.model('Booking', bookingSchema);
+
