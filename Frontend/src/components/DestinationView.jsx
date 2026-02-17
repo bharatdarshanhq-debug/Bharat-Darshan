@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Clock, ArrowRight, MapPin, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/forms";
+import { useSettings } from "@/context/SettingsContext";
 
 // Static descriptions for destinations
 const DESTINATION_INFO = {
@@ -33,6 +34,7 @@ const DESTINATION_INFO = {
 };
 
 const DestinationView = ({ destination, packages, allPackages, onBack, stateName = "Odisha", stateSlug = "odisha" }) => {
+  const { settings } = useSettings();
   // 1. Gather Images for Banner - prioritize heroImages from packages
   const heroImagesFromPackages = packages.flatMap(p => p.heroImages || []).filter(Boolean);
   const allImages = packages.flatMap(p => p.images || [p.image]).filter(Boolean);
@@ -252,15 +254,23 @@ const DestinationView = ({ destination, packages, allPackages, onBack, stateName
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className={`block text-2xl font-bold ${isElite ? "text-amber-400" : "text-primary"}`}>
-                            {typeof pkg.price === 'number' || !isNaN(pkg.price) 
-                              ? `₹${(Number(pkg.price) / 1000).toFixed(1)}k`
-                              : pkg.price || 'Contact'
-                            }
-                          </span>
-                          {(typeof pkg.price === 'number' || !isNaN(pkg.price)) && (
-                            <span className={`text-xs line-through ${isElite ? "text-gray-600" : "text-muted-foreground"}`}>
-                              ₹{(Math.round(Number(pkg.price) / 0.6) / 1000).toFixed(1)}k
+                          {settings?.website?.showPrices ? (
+                            <>
+                              <span className={`block text-2xl font-bold ${isElite ? "text-amber-400" : "text-primary"}`}>
+                                {typeof pkg.price === 'number' || !isNaN(pkg.price) 
+                                  ? `₹${(Number(pkg.price) / 1000).toFixed(1)}k`
+                                  : pkg.price || 'Contact'
+                                }
+                              </span>
+                              {(typeof pkg.price === 'number' || !isNaN(pkg.price)) && (
+                                <span className={`text-xs line-through ${isElite ? "text-gray-600" : "text-muted-foreground"}`}>
+                                  ₹{(Math.round(Number(pkg.price) / 0.6) / 1000).toFixed(1)}k
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <span className={`block text-sm font-bold ${isElite ? "text-amber-400" : "text-primary"}`}>
+                              Check Details
                             </span>
                           )}
                         </div>

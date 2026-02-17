@@ -13,7 +13,7 @@ import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import Bookings from "./pages/Bookings";
 import BookingDetail from "./pages/BookingDetail";
-import HotelSelection from './pages/HotelSelection'; // Added import
+import HotelSelection from './pages/HotelSelection';
 import BookingSuccess from "./pages/BookingSuccess";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
@@ -23,32 +23,60 @@ import ScrollToTop from "@/components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
+import { useSettings, SettingsProvider } from "./context/SettingsContext";
+import Maintenance from "./pages/Maintenance";
+import { Loader2 } from "lucide-react";
+
+const AppRoutes = () => {
+  const { settings, loading } = useSettings();
+
+  if (loading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Allow access to login/admin even in maintenance mode if needed, but for now strict maintenance
+  // You might want to allow a specific query param or route to bypass, but keeping it simple
+  if (settings?.website?.maintenance) {
+    return <Maintenance />;
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/destinations" element={<Destinations />} />
+      <Route path="/packages" element={<Packages />} />
+      <Route path="/packages/:id" element={<PackageDetail />} />
+      <Route path="/experiences" element={<Experiences />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/bookings" element={<Bookings />} />
+      <Route path="/bookings/:id" element={<BookingDetail />} />
+      <Route path="/bookings/:bookingId/select-hotels" element={<HotelSelection />} />
+      <Route path="/booking-success" element={<BookingSuccess />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/refund" element={<RefundPolicy />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner position="top-center" />
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/destinations" element={<Destinations />} />
-          <Route path="/packages" element={<Packages />} />
-          <Route path="/packages/:id" element={<PackageDetail />} />
-          <Route path="/experiences" element={<Experiences />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/bookings" element={<Bookings />} />
-          <Route path="/bookings/:id" element={<BookingDetail />} />
-          <Route path="/bookings/:bookingId/select-hotels" element={<HotelSelection />} />
-          <Route path="/booking-success" element={<BookingSuccess />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<TermsOfService />} />
-          <Route path="/refund" element={<RefundPolicy />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <SettingsProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <AppRoutes />
+        </BrowserRouter>
+      </SettingsProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
