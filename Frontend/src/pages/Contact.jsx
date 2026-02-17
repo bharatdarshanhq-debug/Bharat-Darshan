@@ -113,7 +113,7 @@ const Contact = () => {
       }
 
       setSubmitted(true);
-      setFormData({ name: "", email: "", phone: "", message: "", package: "" });
+      setFormData({ name: "", email: "", phone: "", message: "", package: "", destination: "" });
       setTimeout(() => setSubmitted(false), 5000);
     } catch (err) {
       setStatus({ loading: false, error: err.message });
@@ -154,22 +154,25 @@ const Contact = () => {
                 { icon: MessageCircle, title: "WhatsApp", info: "+91 95560 06338", action: "https://wa.me/919556006338" },
                 { icon: Mail, title: "Email", info: "bharatdarshan.hq@gmail.com", action: "mailto:bharatdarshan.hq@gmail.com" },
                 { icon: Clock, title: "Hours", info: "24/7 Support", action: null },
-              ].map((item, index) => (
-                <motion.a
-                  key={index}
-                  href={item.action || "#"}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-card rounded-2xl p-6 text-center shadow-card hover:shadow-elevated transition-all duration-300 border border-border hover:border-primary/30"
-                >
-                  <div className="w-14 h-14 rounded-xl bg-hero-gradient flex items-center justify-center mx-auto mb-4">
-                    <item.icon className="w-7 h-7 text-primary-foreground" />
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-1">{item.title}</h3>
-                  <p className="text-muted-foreground">{item.info}</p>
-                </motion.a>
-              ))}
+              ].map((item, index) => {
+                const Card = item.action ? motion.a : motion.div;
+                return (
+                  <Card
+                    key={index}
+                    href={item.action || undefined}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className={`bg-card rounded-2xl p-6 text-center shadow-card hover:shadow-elevated transition-all duration-300 border border-border hover:border-primary/30 ${!item.action ? 'cursor-default' : ''}`}
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-hero-gradient flex items-center justify-center mx-auto mb-4">
+                      <item.icon className="w-7 h-7 text-primary-foreground" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-1">{item.title}</h3>
+                    <p className="text-muted-foreground">{item.info}</p>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -411,13 +414,12 @@ const Contact = () => {
               className="text-center max-w-3xl mx-auto mb-12"
             >
               <span className="inline-block px-4 py-2 rounded-full bg-secondary text-primary text-sm font-medium mb-4">
-                “ FAQs
+                FAQs
               </span>
               <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
                 Frequently Asked Questions
               </h2>
             </motion.div>
-
             <div className="max-w-3xl mx-auto space-y-4">
               {faqs
                 .slice(faqPage * FAQS_PER_PAGE, (faqPage + 1) * FAQS_PER_PAGE)

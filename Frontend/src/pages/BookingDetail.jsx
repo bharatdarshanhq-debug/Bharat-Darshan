@@ -159,7 +159,7 @@ const BookingDetail = () => {
                 className="md:col-span-2 space-y-6"
               >
                 {/* Header Card */}
-                <div className="bg-search-gradient rounded-3xl p-6 md:p-8 text-primary-foreground relative overflow-hidden shadow-lg">
+                <div className="bg-hero-gradient rounded-3xl p-6 md:p-8 text-primary-foreground relative overflow-hidden shadow-lg">
                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                       <div>
                         <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-3 bg-white/20 backdrop-blur-sm border border-white/20 uppercase tracking-wider`}>
