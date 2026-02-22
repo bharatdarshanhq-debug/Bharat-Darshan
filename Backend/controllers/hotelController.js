@@ -6,10 +6,9 @@ const Hotel = require('../models/Hotel');
 const getHotels = async (req, res) => {
   try {
     const { destination, packageType } = req.query;
-    let query = {};
+    let query = { isActive: true };
 
     if (destination) {
-      // Case-insensitive regex search for destination
       query.destination = { $regex: destination, $options: 'i' };
     }
 
@@ -17,11 +16,55 @@ const getHotels = async (req, res) => {
       query.packageType = packageType;
     }
 
-    // Only active hotels
-    query.isActive = true;
+    // 1. Fetch from Local DB (Manual setup from Admin Panel)
+    const localHotels = await Hotel.find(query).sort({ createdAt: -1 });
 
-    const hotels = await Hotel.find(query).sort({ createdAt: -1 });
-    res.json(hotels);
+    // 2. Fetch from OTA API if link is provided
+    let otaHotels = [];
+    if (process.env.OTA_API_LINK) {
+      try {
+        const otaUrl = new URL(process.env.OTA_API_LINK);
+        // Pass filters to OTA API if supported, otherwise filter locally
+        if (destination) otaUrl.searchParams.append('city', destination);
+        
+        const response = await fetch(otaUrl.toString(), {
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+          const rawOtaData = await response.json();
+          
+          // Map OTA data to our Hotel schema format
+          // Note: Specific mapping depends on the client's API structure
+          const mappedHotels = (Array.isArray(rawOtaData) ? rawOtaData : [rawOtaData]).map(item => ({
+            _id: `ota_${item.id || Math.random().toString(36).substr(2, 9)}`,
+            name: item.name || item.hotel_name,
+            destination: item.city || item.destination || destination || 'Puri',
+            location: item.address || item.location || 'See OTA Details',
+            packageType: item.tier ? [item.tier] : (packageType ? [packageType] : ['Standard']),
+            images: item.photos || item.images || [],
+            amenities: item.facilities || item.amenities || [],
+            description: item.summary || item.description || '',
+            rating: item.star_rating || item.rating || 4,
+            isActive: true,
+            isOTA: true // Flag to distinguish OTA hotels if needed
+          }));
+
+          // Filter by packageType (tier) if the API didn't do it
+          otaHotels = mappedHotels.filter(hotel => 
+            !packageType || hotel.packageType.includes(packageType)
+          );
+        }
+      } catch (otaError) {
+        console.error('OTA API Fetch Error:', otaError.message);
+        // Silent fail for OTA - we still want to return local hotels
+      }
+    }
+
+    // Combine both results
+    const allHotels = [...localHotels, ...otaHotels];
+    
+    res.json(allHotels);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaHotel, FaMapMarkerAlt, FaStar, FaCheck, FaWifi, FaSwimmingPool, FaUtensils, FaSpa } from 'react-icons/fa';
 import { sonnerToast as toast } from '@/components/ui/feedback';
+import BookingModal from '@/components/BookingModal';
+import { fetchPackageById } from '@/services/packageService';
 
 const HotelSelection = () => {
-  const { bookingId } = useParams();
+  const { bookingId, packageId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [booking, setBooking] = useState(null);
   const [packageDetails, setPackageDetails] = useState(null);
   const [hotels, setHotels] = useState([]);
@@ -14,57 +17,55 @@ const HotelSelection = () => {
   const [error, setError] = useState(null);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const token = localStorage.getItem('token');
+  const initialTravelers = location.state?.travelers || 2;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
         if (!token) {
           navigate('/login');
           return;
         }
-
-        // 1. Fetch Booking Details
-        const bookingRes = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${bookingId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        if (!bookingRes.ok) throw new Error('Failed to fetch booking details');
-        const bookingData = await bookingRes.json();
-        setBooking(bookingData.booking);
-
-        // 2. Fetch Package Details to get destination
-        const packageId = bookingData.booking.packageId;
-        const packageRes = await fetch(`${import.meta.env.VITE_API_URL}/api/packages/${packageId}`);
-        
-        let destination = 'Puri'; // Default fallback
-        let packageType = 'Premium'; // Default fallback
-        
-        if (packageRes.ok) {
-          const pkgData = await packageRes.json();
+        let destination = 'Puri';
+        let packageType = 'Premium';
+        if (bookingId) {
+          // flow for existing booking (legacy or admin)
+          const bookingRes = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${bookingId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (!bookingRes.ok) throw new Error('Failed to fetch booking details');
+          const bookingData = await bookingRes.json();
+          setBooking(bookingData.booking);
+          const pkgId = bookingData.booking.packageId;
+          const pkgData = await fetchPackageById(pkgId);
           setPackageDetails(pkgData);
           destination = pkgData.primaryDestination || pkgData.destination?.name || destination;
           packageType = pkgData.type || packageType;
-        } else {
-          // Fallback: Try to infer from package name
-          const typeMatch = bookingData.booking.packageName.match(/(Premium|Pro|Elite)/i);
-          packageType = typeMatch ? typeMatch[0] : 'Premium';
-          
-          // Try to infer destination from package name
-          const destMatch = bookingData.booking.packageName.match(/(Puri|Bhubaneswar|Chilika|Konark|Gopalpur|Similipal)/i);
-          destination = destMatch ? destMatch[0] : destination;
+        } else if (packageId) {
+          // Flow: Package -> Hotel Selection -> Booking
+          const pkgData = await fetchPackageById(packageId);
+          setPackageDetails(pkgData);
+          destination = pkgData.primaryDestination || pkgData.destination?.name || destination;
+          packageType = pkgData.type || packageType;
         }
-
         // 3. Fetch Hotels for this destination and package type
         const hotelsRes = await fetch(
           `${import.meta.env.VITE_API_URL}/api/hotels?destination=${destination}&packageType=${packageType}&isActive=true`
         );
         const hotelsData = await hotelsRes.json();
         
-        // If no hotels found, skip to success
+        // If no hotels found, depending on flow
         if (!hotelsData || hotelsData.length === 0) {
-          toast.info('No hotel options available for this package. Proceeding to confirmation.');
-          navigate(`/booking-success?id=${bookingId}`);
+          if (bookingId) {
+            toast.info('No hotel options available for this package. Proceeding to confirmation.');
+            navigate(`/booking-success?id=${bookingId}`);
+          } else {
+            setError('No hotel options are available for this destination and package tier. Please contact support or choose another package.');
+          }
+          setLoading(false);
           return;
         }
 
@@ -79,7 +80,7 @@ const HotelSelection = () => {
     };
 
     fetchData();
-  }, [bookingId, navigate]);
+  }, [bookingId, packageId, navigate, token]);
 
   const handleSelect = (hotel) => {
     setSelectedHotel(hotel);
@@ -91,9 +92,14 @@ const HotelSelection = () => {
       return;
     }
     
+    if (packageId) {
+      // New flow: open booking form
+      setShowBookingModal(true);
+      return;
+    }
+
     try {
       setSubmitting(true);
-      const token = localStorage.getItem('token');
       
       const payload = {
         selectedHotels: [{
@@ -122,7 +128,6 @@ const HotelSelection = () => {
       setSubmitting(false);
     }
   };
-
   // Loading State
   if (loading) {
     return (
@@ -132,7 +137,6 @@ const HotelSelection = () => {
       </div>
     );
   }
-
   // Error State
   if (error) {
     return (
@@ -143,12 +147,20 @@ const HotelSelection = () => {
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">Oops! Something went wrong</h2>
           <p className="text-gray-600 mb-6">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="px-6 py-3 bg-orange-600 text-white rounded-xl font-medium hover:bg-orange-700 transition-colors"
-          >
-            Try Again
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+            >
+              Try Again
+            </button>
+            <button 
+              onClick={() => navigate(-1)} 
+              className="px-6 py-3 bg-orange-600 text-white rounded-xl font-medium hover:bg-orange-700 transition-colors"
+            >
+              Go Back to Package
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -172,12 +184,14 @@ const HotelSelection = () => {
             <div className="flex flex-wrap gap-4 text-white/90 text-sm md:text-base">
               <span className="flex items-center gap-2">
                 <FaHotel className="text-white/70" />
-                {booking?.packageName}
+                {booking?.packageName || packageDetails?.name}
               </span>
               <span className="hidden md:inline">•</span>
-              <span className="font-mono bg-white/20 px-3 py-1 rounded-full text-sm">
-                Booking #{bookingId?.slice(-8).toUpperCase()}
-              </span>
+              {bookingId && (
+                <span className="font-mono bg-white/20 px-3 py-1 rounded-full text-sm">
+                  Booking #{bookingId?.slice(-8).toUpperCase()}
+                </span>
+              )}
             </div>
           </motion.div>
         </div>
@@ -211,6 +225,23 @@ const HotelSelection = () => {
             >
               {/* Image */}
               <div className="h-52 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
+                {/* Package Tier Ribbon */}
+                {(booking?.packageName || packageDetails?.name) && (
+                  <div className="absolute top-0 left-0 overflow-hidden w-24 h-24 z-10 pointer-events-none">
+                    <div className={`absolute top-4 -left-8 w-32 py-1 -rotate-45 text-center text-xs font-bold text-white shadow-sm uppercase tracking-wider ${
+                      (booking?.packageName || packageDetails?.name).toLowerCase().includes('pro') ? 'bg-red-600' :
+                      (booking?.packageName || packageDetails?.name).toLowerCase().includes('premium') ? 'bg-amber-500' :
+                      (booking?.packageName || packageDetails?.name).toLowerCase().includes('lite') ? 'bg-sky-500' :
+                      'bg-orange-600'
+                    }`}>
+                      {(booking?.packageName || packageDetails?.name).toLowerCase().includes('pro') ? 'PRO' :
+                       (booking?.packageName || packageDetails?.name).toLowerCase().includes('premium') ? 'PREMIUM' :
+                       (booking?.packageName || packageDetails?.name).toLowerCase().includes('lite') ? 'LITE' :
+                       (booking?.packageName || packageDetails?.name).split(' ')[0]}
+                    </div>
+                  </div>
+                )}
+
                 {hotel.images && hotel.images[0] ? (
                   <img 
                     src={hotel.images[0]} 
@@ -333,6 +364,18 @@ const HotelSelection = () => {
           </div>
         </div>
       </div>
+      {/* Booking Modal */}
+      {packageDetails && (
+        <BookingModal
+          isOpen={showBookingModal}
+          onClose={() => setShowBookingModal(false)}
+          pkg={packageDetails}
+          user={user}
+          token={token}
+          initialTravelers={initialTravelers}
+          selectedHotel={selectedHotel}
+        />
+      )}
     </div>
   );
 };

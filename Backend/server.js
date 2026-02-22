@@ -25,6 +25,7 @@ app.use('/api/destinations', require('./routes/destinationRoutes'));
 app.use('/api/packages', require('./routes/packageRoutes'));
 app.use('/api/payments', require('./routes/paymentRoutes'));
 app.use('/api/hotels', require('./routes/hotelRoutes'));
+
 app.use('/api/states', require('./routes/stateRoutes'));
 app.use('/api/faqs', require('./routes/faqRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));

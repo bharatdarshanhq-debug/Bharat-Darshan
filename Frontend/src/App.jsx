@@ -57,6 +57,7 @@ const AppRoutes = () => {
       <Route path="/bookings" element={<Bookings />} />
       <Route path="/bookings/:id" element={<BookingDetail />} />
       <Route path="/bookings/:bookingId/select-hotels" element={<HotelSelection />} />
+      <Route path="/packages/:packageId/hotels" element={<HotelSelection />} />
       <Route path="/booking-success" element={<BookingSuccess />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />

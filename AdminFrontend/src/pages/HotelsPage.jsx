@@ -40,7 +40,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/Layout';
-import { mockHotels } from '@/data/mockData';
+import { useEffect } from 'react';
+import hotelService from '@/services/hotelService';
 import { HotelForm } from '@/components/admin/forms/HotelForm';
 
 const amenityIcons = {
@@ -60,6 +61,8 @@ const tierColors = {
 };
 
 export default function HotelsPage() {
+  const [hotels, setHotels] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [destinationFilter, setDestinationFilter] = useState('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -68,6 +71,22 @@ export default function HotelsPage() {
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  useEffect(() => {
+    fetchHotels();
+  }, []);
+
+  const fetchHotels = async () => {
+    try {
+      setIsLoading(true);
+      const data = await hotelService.getHotels();
+      setHotels(data);
+    } catch (error) {
+      console.error('Failed to fetch hotels:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleView = (hotel) => {
     setSelectedHotel(hotel);
@@ -79,14 +98,26 @@ export default function HotelsPage() {
     setIsEditOpen(true);
   };
 
-  const destinations = [...new Set(mockHotels.map(h => h.destination))];
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this hotel?')) {
+      try {
+        await hotelService.deleteHotel(id);
+        fetchHotels();
+      } catch (error) {
+        console.error('Failed to delete hotel:', error);
+      }
+    }
+  };
 
-  const filteredHotels = mockHotels.filter((hotel) => {
+  const destinations = [...new Set(hotels.map(h => h.destination))];
+
+  const filteredHotels = hotels.filter((hotel) => {
     const matchesSearch = hotel.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       hotel.location.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDestination = destinationFilter === 'all' || hotel.destination === destinationFilter;
     return matchesSearch && matchesDestination;
   });
+
 
   return (
     <div className="space-y-6">
@@ -113,7 +144,10 @@ export default function HotelsPage() {
               <DialogTitle className="font-display text-xl">Add New Hotel</DialogTitle>
               <DialogDescription>Register a new partner hotel</DialogDescription>
             </DialogHeader>
-            <HotelForm onClose={() => setIsFormOpen(false)} />
+            <HotelForm onClose={() => {
+              setIsFormOpen(false);
+              fetchHotels();
+            }} />
           </DialogContent>
         </Dialog>
       </motion.div>
@@ -192,7 +226,7 @@ export default function HotelsPage() {
                       Edit
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer text-destructive">
+                    <DropdownMenuItem className="cursor-pointer text-destructive" onClick={() => handleDelete(hotel._id || hotel.id)}>
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete
                     </DropdownMenuItem>
@@ -214,7 +248,7 @@ export default function HotelsPage() {
               
               {/* Tier Applicability */}
               <div className="flex flex-wrap gap-1 mt-3">
-                {hotel.tierApplicability.map((tier) => (
+                {(Array.isArray(hotel.packageType) ? hotel.packageType : [hotel.packageType || 'Standard']).map((tier) => (
                   <Badge key={tier} className={tierColors[tier]} variant="secondary">
                     {tier}
                   </Badge>
@@ -243,7 +277,11 @@ export default function HotelsPage() {
         ))}
       </motion.div>
 
-      {filteredHotels.length === 0 && (
+      {isLoading ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading hotels...</p>
+        </div>
+      ) : filteredHotels.length === 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -298,7 +336,7 @@ export default function HotelsPage() {
                 <div>
                   <h4 className="font-semibold text-foreground mb-3">Available for Tiers</h4>
                   <div className="flex flex-wrap gap-2">
-                    {selectedHotel.tierApplicability.map((tier) => (
+                    {(Array.isArray(selectedHotel.packageType) ? selectedHotel.packageType : [selectedHotel.packageType || 'Standard']).map((tier) => (
                       <Badge key={tier} className={tierColors[tier]} variant="secondary">
                         {tier}
                       </Badge>
@@ -358,6 +396,7 @@ export default function HotelsPage() {
               onClose={() => {
                 setIsEditOpen(false);
                 setSelectedHotel(null);
+                fetchHotels();
               }} 
               initialData={selectedHotel}
             />

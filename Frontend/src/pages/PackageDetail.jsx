@@ -23,7 +23,6 @@ const PackageDetail = () => {
   const [pkg, setPkg] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showBookingModal, setShowBookingModal] = useState(false);
   const user = JSON.parse(localStorage.getItem('user') || 'null');
   const token = localStorage.getItem('token');
 
@@ -82,7 +81,8 @@ const PackageDetail = () => {
       navigate('/login', { state: { from: `/packages/${id}` } });
       return;
     }
-    setShowBookingModal(true);
+    // Navigate to hotel selection first
+    navigate(`/packages/${id}/hotels`, { state: { travelers } });
   };
 
   if (loading) {
@@ -501,14 +501,6 @@ const PackageDetail = () => {
       <Footer />
 
       {/* Booking Modal */}
-      <BookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        pkg={pkg}
-        user={user}
-        token={token}
-        initialTravelers={travelers}
-      />
     </div>
   );
 };

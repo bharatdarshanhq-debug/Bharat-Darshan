@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Users, Phone, MessageSquare, CreditCard, Shield, Loader2 } from 'lucide-react';
+import { FaHotel } from 'react-icons/fa';
 import { Button } from '@/components/ui/forms';
 import { sonnerToast as toast } from '@/components/ui/feedback';
 import { createBooking, createPaymentOrder, verifyPayment, getRazorpayKey } from '@/services/packageService';
 
-const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2 }) => {
+const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2, selectedHotel = null }) => {
   const navigate = useNavigate();
   const [tripDate, setTripDate] = useState('');
   const [travelers, setTravelers] = useState(initialTravelers);
@@ -76,6 +77,11 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2 
         totalPrice,
         contactPhone,
         specialRequests,
+        selectedHotels: selectedHotel ? [{
+          city: selectedHotel.destination,
+          hotelId: selectedHotel._id,
+          hotelName: selectedHotel.name
+        }] : [],
       };
 
       const booking = await createBooking(bookingData, token);
@@ -115,8 +121,12 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2 
               
               toast.success('Payment successful! Your booking is confirmed.');
               onClose();
-              // Redirect to hotel selection page first
-              window.location.href = `/bookings/${booking._id}/select-hotels`;
+              // Redirect based on whether hotel was already selected
+              if (selectedHotel) {
+                window.location.href = `/booking-success?id=${booking._id}`;
+              } else {
+                window.location.href = `/bookings/${booking._id}/select-hotels`;
+              }
             } catch (error) {
               toast.error('Payment verification failed. Please contact support.');
             }
@@ -206,6 +216,20 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2 
                 <p className="text-sm text-gray-500">{pkg.duration}</p>
               </div>
             </div>
+
+            {/* Selected Hotel info if available */}
+            {selectedHotel && (
+              <div className="bg-green-50 rounded-2xl p-4 flex gap-4 border border-green-100">
+                 <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <FaHotel className="text-green-600" />
+                 </div>
+                 <div>
+                    <p className="text-xs text-green-600 font-bold uppercase tracking-wider">Selected Hotel</p>
+                    <h4 className="font-bold text-gray-900">{selectedHotel.name}</h4>
+                    <p className="text-sm text-gray-500">{selectedHotel.destination}</p>
+                 </div>
+              </div>
+            )}
 
             {/* Form Fields */}
             <div className="space-y-4">

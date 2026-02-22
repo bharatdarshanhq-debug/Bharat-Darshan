@@ -112,7 +112,7 @@ const bookingSchema = new mongoose.Schema(
     // Hotel Selection
     selectedHotels: [{
       city: { type: String, required: true },
-      hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },
+      hotelId: { type: String, required: true },
       hotelName: { type: String, required: true },
     }],
     isReadByAdmin: {

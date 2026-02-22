@@ -13,6 +13,7 @@ const createBooking = async (req, res) => {
       destination,
       contactPhone,
       specialRequests,
+      selectedHotels,
       // Manual/Admin fields
       contactName,
       contactEmail,
@@ -43,6 +44,7 @@ const createBooking = async (req, res) => {
       destination,
       contactPhone,
       specialRequests,
+      selectedHotels: selectedHotels || [],
       contactName: contactName || req.user.name,
       contactEmail: contactEmail || req.user.email,
     };
