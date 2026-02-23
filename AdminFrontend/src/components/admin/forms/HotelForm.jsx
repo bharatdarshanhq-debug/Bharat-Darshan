@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/Interactive';
 import { Separator } from '@/components/ui/Primitives';
 import destinationService from '@/services/destinationService';
+import hotelService from '@/services/hotelService';
 
 const tiers = ['Lite', 'Standard', 'Pro', 'Premium', 'Elite'];
 
@@ -28,6 +29,8 @@ export function HotelForm({ onClose, initialData }) {
   const [selectedImages, setSelectedImages] = useState(initialData?.images ?? []);
   const [destinations, setDestinations] = useState([]);
   const [isDestinationsLoading, setIsDestinationsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchDestinations = async () => {
@@ -55,23 +58,44 @@ export function HotelForm({ onClose, initialData }) {
   };
 
   const [selectedDestination, setSelectedDestination] = useState(initialData?.destination || '');
+  const [selectedRating, setSelectedRating] = useState(initialData?.rating?.toString() || 'none');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!selectedDestination) {
+      setError('Please select a destination');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
     const formData = {
       name: e.target.name.value,
       destination: selectedDestination,
       location: e.target.location.value,
-      rating: e.target.rating ? e.target.rating.value : (initialData?.rating || 5),
+      rating: selectedRating === 'none' ? 0 : Number(selectedRating),
       description: e.target.description.value,
       packageType: selectedTiers,
-      amenities: e.target.amenities.value.split(',').map(a => a.trim()),
+      amenities: e.target.amenities.value.split(',').map(a => a.trim()).filter(Boolean),
       images: selectedImages,
       isActive
     };
-    console.log('Form submitted:', formData);
-    // Handle form submission (e.g., call hotelService.createHotel(formData))
-    onClose();
+
+    try {
+      if (initialData?._id || initialData?.id) {
+        await hotelService.updateHotel(initialData._id || initialData.id, formData);
+      } else {
+        await hotelService.createHotel(formData);
+      }
+      onClose();
+    } catch (err) {
+      console.error('Failed to save hotel:', err);
+      setError(err.response?.data?.message || 'Failed to save hotel. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -82,7 +106,7 @@ export function HotelForm({ onClose, initialData }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="name">Hotel Name *</Label>
-            <Input id="name" placeholder="e.g., Taj Lake Palace" defaultValue={initialData?.name} />
+            <Input id="name" placeholder="e.g., Taj Lake Palace" defaultValue={initialData?.name} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="destination">Destination *</Label>
@@ -116,11 +140,15 @@ export function HotelForm({ onClose, initialData }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="rating">Star Rating</Label>
-            <Select defaultValue={initialData?.rating?.toString() ?? '5'}>
+            <Select 
+              value={selectedRating} 
+              onValueChange={setSelectedRating}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select rating" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">Select</SelectItem>
                 <SelectItem value="3">3 Star</SelectItem>
                 <SelectItem value="4">4 Star</SelectItem>
                 <SelectItem value="5">5 Star</SelectItem>
@@ -240,13 +268,27 @@ export function HotelForm({ onClose, initialData }) {
       <Separator />
 
       {/* Actions */}
-      <div className="flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button type="submit" className="bg-gradient-primary hover:opacity-90 text-white">
-          {initialData ? 'Update Hotel' : 'Add Hotel'}
-        </Button>
+      <div className="flex flex-col gap-3">
+        {error && <p className="text-sm text-destructive text-center">{error}</p>}
+        <div className="flex justify-end gap-3">
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            className="bg-gradient-primary hover:opacity-90 text-white min-w-[120px]"
+            disabled={isSubmitting || isDestinationsLoading}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              initialData ? 'Update Hotel' : 'Add Hotel'
+            )}
+          </Button>
+        </div>
       </div>
     </form>
   );

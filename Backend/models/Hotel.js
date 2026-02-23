@@ -15,7 +15,7 @@ const hotelSchema = new mongoose.Schema(
     },
     location: {
       type: String,
-      required: [true, 'Specific location/address is required'],
+      default: '',
     },
     packageType: [{
       type: String,

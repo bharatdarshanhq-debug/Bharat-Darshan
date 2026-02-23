@@ -42,13 +42,15 @@ const HotelSelection = () => {
           const pkgId = bookingData.booking.packageId;
           const pkgData = await fetchPackageById(pkgId);
           setPackageDetails(pkgData);
-          destination = pkgData.primaryDestination || pkgData.destination?.name || destination;
+          // Use stateName if available, as Admin now saves hotels by State
+          destination = pkgData.stateName || pkgData.primaryDestination || pkgData.destination?.name || destination;
           packageType = pkgData.type || packageType;
         } else if (packageId) {
           // Flow: Package -> Hotel Selection -> Booking
           const pkgData = await fetchPackageById(packageId);
           setPackageDetails(pkgData);
-          destination = pkgData.primaryDestination || pkgData.destination?.name || destination;
+          // Use stateName if available
+          destination = pkgData.stateName || pkgData.primaryDestination || pkgData.destination?.name || destination;
           packageType = pkgData.type || packageType;
         }
         // 3. Fetch Hotels for this destination and package type

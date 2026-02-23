@@ -191,7 +191,7 @@ export default function HotelsPage() {
       >
         {filteredHotels.map((hotel, index) => (
           <motion.div
-            key={hotel.id}
+            key={hotel._id || hotel.id || index}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 + index * 0.05 }}
