@@ -2,7 +2,6 @@ import * as React from "react";
 import * as ProgressPrimitive from "@radix-ui/react-progress";
 import * as ToastPrimitives from "@radix-ui/react-toast";
 import { Toaster as SonnerPrimitive, toast as sonnerToast } from "sonner";
-import { useTheme } from "next-themes";
 import { cva } from "class-variance-authority";
 import { X } from "lucide-react";
 
@@ -84,7 +83,7 @@ Progress.displayName = ProgressPrimitive.Root.displayName;
 
 // --- Sonner ---
 const SonnerToaster = ({ ...props }) => {
-  const { theme = "system" } = useTheme();
+  const theme = "system";
 
   return (
     <SonnerPrimitive
