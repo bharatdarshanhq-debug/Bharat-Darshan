@@ -12,7 +12,8 @@ import {
   Car,
   UtensilsCrossed,
   Waves,
-  MapPin, // Added MapPin
+  MapPin, 
+  ExternalLink, 
 } from 'lucide-react';
 import { Separator } from '@/components/ui/Primitives'; // Added Separator
 import { Button } from '@/components/ui/Primitives';
@@ -360,6 +361,30 @@ export default function HotelsPage() {
                       );
                     })}
                   </div>
+                </div>
+
+                <Separator />
+
+                {/* OTA Configuration */}
+                <div>
+                  <h4 className="font-semibold text-foreground mb-3">OTA Configuration</h4>
+                  {selectedHotel.otaApiLink ? (
+                    <div className="bg-muted p-3 rounded-lg flex items-center justify-between">
+                      <code className="text-xs text-muted-foreground break-all mr-2">
+                        {selectedHotel.otaApiLink}
+                      </code>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="h-8 w-8 shrink-0"
+                        onClick={() => window.open(selectedHotel.otaApiLink, '_blank')}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">No OTA link configured</p>
+                  )}
                 </div>
 
                 {/* Actions */}

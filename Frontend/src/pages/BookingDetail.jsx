@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Calendar, ArrowLeft, Loader2, Users, Phone, 
   MessageSquare, CreditCard, Clock, CheckCircle2, XCircle, Printer,
-  AlertTriangle, RefreshCcw, Ban
+  AlertTriangle, RefreshCcw, Ban, Download
 } from "lucide-react";
 import { Button } from "@/components/ui/forms";
 import Navbar from "@/components/Navbar";
@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { getRefundPreview, requestCancellation } from "@/services/packageService";
+import { generateInvoicePdf } from "@/utils/InvoicePdf";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const API_URL = API_BASE.includes('/api') ? API_BASE : `${API_BASE.replace(/\/$/, "")}/api`;
@@ -27,6 +28,7 @@ const BookingDetail = () => {
   const [refundPreview, setRefundPreview] = useState(null);
   const [loadingRefund, setLoadingRefund] = useState(false);
   const [submittingCancel, setSubmittingCancel] = useState(false);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   useEffect(() => {
     fetchBooking();
@@ -73,6 +75,19 @@ const BookingDetail = () => {
       toast.error(error.message || "Could not load refund details");
     } finally {
       setLoadingRefund(false);
+    }
+  };
+
+  const handleDownloadInvoice = async () => {
+    setGeneratingPdf(true);
+    try {
+      await generateInvoicePdf(booking);
+      toast.success("Invoice downloaded successfully!");
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      toast.error("Failed to generate invoice. Please try again.");
+    } finally {
+      setGeneratingPdf(false);
     }
   };
 
@@ -354,10 +369,18 @@ const BookingDetail = () => {
                     </div>
                  </div>
 
-                 {booking.status === 'confirmed' && (
-                     <Button variant="hero" className="w-full gap-2">
-                         <Printer className="w-4 h-4" />
-                         Download Invoice
+                 {['confirmed', 'completed'].includes(booking.status) && (
+                     <Button 
+                       variant="hero" 
+                       className="w-full gap-2" 
+                       onClick={handleDownloadInvoice}
+                       disabled={generatingPdf}
+                     >
+                         {generatingPdf ? (
+                           <><Loader2 className="w-4 h-4 animate-spin" /> Generating...</>
+                         ) : (
+                           <><Download className="w-4 h-4" /> Download Invoice</>
+                         )}
                      </Button>
                  )}
 

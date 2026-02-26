@@ -116,23 +116,10 @@ const HotelSelection = () => {
       setSubmitting(true);
 
       // --- OTA API Integration Flow ---
-      if (selectedHotel.otaApiLink) {
-        toast.info(`Connecting to OTA Booking Engine: ${selectedHotel.name}...`);
+      if (selectedHotel.isOTA || selectedHotel.otaApiLink) {
+        toast.info(`Finalizing with OTA partner: ${selectedHotel.name}...`);
         
-        // Simulating the OTA Processing Time
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Simulating the OTA API Call
-        console.log('Calling OTA API:', selectedHotel.otaApiLink);
-        
-        // We simulate a successful booking via the OTA link
-        toast.success(`Booking confirmed automatically via OTA for ${selectedHotel.name}!`);
-        
-        // For OTA flow, we might still want to record it in our backend
-        // but since we don't have a specific requirement for that yet,
-        // we'll proceed to the success page.
-        
-        // If we need to notify our backend about the OTA booking:
+        // Prepare payload for backend recording
         const otaPayload = {
           selectedHotels: [{
             city: selectedHotel.destination,
@@ -143,19 +130,37 @@ const HotelSelection = () => {
           }]
         };
 
+        // If we have an existing booking ID, record the selection in our backend first
         if (bookingId) {
-          await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${bookingId}/hotels`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify(otaPayload)
-          });
+          try {
+            await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${bookingId}/hotels`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+              },
+              body: JSON.stringify(otaPayload)
+            });
+          } catch (recError) {
+            console.error('Failed to record OTA selection:', recError);
+            // We continue anyway as the redirect is the primary action
+          }
         }
 
-        navigate(`/booking-success?id=${bookingId || 'OTA_BOOKING'}`);
-        return;
+        // Real Action: Redirect to OTA booking engine if a link exists
+        if (selectedHotel.otaApiLink && selectedHotel.otaApiLink.startsWith('http')) {
+          toast.success(`Redirecting to ${selectedHotel.name} booking engine...`);
+          // Small delay so user can see the toast
+          setTimeout(() => {
+            window.location.href = selectedHotel.otaApiLink;
+          }, 1500);
+          return;
+        } else {
+          // If no specific link, treat as successful manual/automated OTA confirmation
+          toast.success(`Booking confirmed via OTA for ${selectedHotel.name}!`);
+          navigate(`/booking-success?id=${bookingId || 'OTA_BOOKING'}`);
+          return;
+        }
       }
       // --- End OTA API Integration Flow ---
       
@@ -290,11 +295,13 @@ const HotelSelection = () => {
                       (booking?.packageName || packageDetails?.name).toLowerCase().includes('pro') ? 'bg-red-600' :
                       (booking?.packageName || packageDetails?.name).toLowerCase().includes('premium') ? 'bg-amber-500' :
                       (booking?.packageName || packageDetails?.name).toLowerCase().includes('lite') ? 'bg-sky-500' :
+                      (booking?.packageName || packageDetails?.name).toLowerCase().includes('standard') ? 'bg-green-600' :
                       'bg-orange-600'
                     }`}>
                       {(booking?.packageName || packageDetails?.name).toLowerCase().includes('pro') ? 'PRO' :
                        (booking?.packageName || packageDetails?.name).toLowerCase().includes('premium') ? 'PREMIUM' :
                        (booking?.packageName || packageDetails?.name).toLowerCase().includes('lite') ? 'LITE' :
+                       (booking?.packageName || packageDetails?.name).toLowerCase().includes('standard') ? 'STANDARD' :
                        (booking?.packageName || packageDetails?.name).split(' ')[0]}
                     </div>
                   </div>

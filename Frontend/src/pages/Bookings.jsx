@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar, MapPin, ArrowRight, Loader2, PackageX, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Calendar, MapPin, ArrowRight, Loader2, PackageX, Clock, CheckCircle2, XCircle, Download } from "lucide-react";
 import { Button } from "@/components/ui/forms";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { generateInvoicePdf } from "@/utils/InvoicePdf";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const API_URL = API_BASE.includes('/api') ? API_BASE : `${API_BASE.replace(/\/$/, "")}/api`;
@@ -194,12 +195,33 @@ const Bookings = () => {
                             <span className="text-sm text-muted-foreground">
                                 Booked on {new Date(booking.createdAt).toLocaleDateString()}
                             </span>
-                            <Link to={`/bookings/${booking._id}`}>
-                                <Button variant="outline" size="sm" className="group/btn">
-                                    View Details
-                                    <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                            <div className="flex items-center gap-2">
+                              {['confirmed', 'completed'].includes(booking.status) && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="gap-1.5 text-primary border-primary/30 hover:bg-primary hover:text-white"
+                                  onClick={async (e) => {
+                                    e.preventDefault();
+                                    try {
+                                      await generateInvoicePdf(booking);
+                                      toast.success("Invoice downloaded!");
+                                    } catch {
+                                      toast.error("Failed to generate invoice");
+                                    }
+                                  }}
+                                >
+                                  <Download className="w-3.5 h-3.5" />
+                                  Invoice
                                 </Button>
-                            </Link>
+                              )}
+                              <Link to={`/bookings/${booking._id}`}>
+                                  <Button variant="outline" size="sm" className="group/btn">
+                                      View Details
+                                      <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                                  </Button>
+                              </Link>
+                            </div>
                         </div>
                       </div>
                     </div>

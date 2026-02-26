@@ -78,6 +78,7 @@ const HotelDetailsModal = ({
                     packageType.toLowerCase().includes('pro') ? 'bg-red-600' :
                     packageType.toLowerCase().includes('premium') ? 'bg-amber-500' :
                     packageType.toLowerCase().includes('lite') ? 'bg-sky-500' :
+                    packageType.toLowerCase().includes('standard') ? 'bg-green-600' :
                     'bg-orange-600'
                   }`}>
                     {packageType}

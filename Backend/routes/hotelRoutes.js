@@ -9,8 +9,10 @@ const {
 } = require('../controllers/hotelController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
+const { validateOtaRequest } = require('../middleware/otaRequestMiddleware');
+
 // Public routes for fetching
-router.route('/').get(getHotels);
+router.route('/').get(validateOtaRequest, getHotels);
 router.route('/:id').get(getHotelById);
 
 // Admin routes (Protected)

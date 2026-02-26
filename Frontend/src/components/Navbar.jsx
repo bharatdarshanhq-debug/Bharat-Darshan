@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Phone, MapPin, User, LogOut, Settings } from "lucide-react";
+import { Menu, X, Phone, MapPin, User, LogOut, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/forms";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -105,7 +105,7 @@ const Navbar = () => {
 
             {/* CTA Button / Profile */}
             <div className="hidden md:flex items-center gap-4 mr-24">
-              <Link to="/contact">
+              <Link to="/packages">
                 <Button variant="hero" size="lg">
                   Book Now
                 </Button>
@@ -155,7 +155,7 @@ const Navbar = () => {
                             onClick={() => setIsProfileOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 text-foreground hover:bg-muted/50 transition-colors"
                           >
-                            <Settings className="w-4 h-4 text-muted-foreground" />
+                            <CalendarDays className="w-4 h-4 text-muted-foreground" />
                             <span>My Bookings</span>
                           </Link>
                         </div>
@@ -257,7 +257,7 @@ const Navbar = () => {
                     </Button>
                   </Link>
                 )}
-                <Link to="/contact" onClick={() => setIsOpen(false)}>
+                <Link to="/packages" onClick={() => setIsOpen(false)}>
                   <Button variant="hero" className="w-full" size="lg">
                     Book Now
                   </Button>
