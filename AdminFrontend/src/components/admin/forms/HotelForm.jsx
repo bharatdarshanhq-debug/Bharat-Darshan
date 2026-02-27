@@ -27,6 +27,7 @@ export function HotelForm({ onClose, initialData }) {
       : (initialData?.packageType ? [initialData.packageType] : ['Premium'])
   );
   const [selectedImages, setSelectedImages] = useState(initialData?.images ?? []);
+  const [newImageFiles, setNewImageFiles] = useState([]);
   const [destinations, setDestinations] = useState([]);
   const [isDestinationsLoading, setIsDestinationsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,18 +72,25 @@ export function HotelForm({ onClose, initialData }) {
     setIsSubmitting(true);
     setError(null);
 
-    const formData = {
-      name: e.target.name.value,
-      destination: selectedDestination,
-      location: e.target.location.value,
-      rating: selectedRating === 'none' ? 0 : Number(selectedRating),
-      description: e.target.description.value,
-      packageType: selectedTiers,
-      amenities: e.target.amenities.value.split(',').map(a => a.trim()).filter(Boolean),
-      images: selectedImages,
-      isActive,
-      otaApiLink: e.target.otaApiLink.value
-    };
+    const formData = new FormData();
+    formData.append('name', e.target.name.value);
+    formData.append('destination', selectedDestination);
+    formData.append('location', e.target.location.value);
+    formData.append('rating', selectedRating === 'none' ? 0 : Number(selectedRating));
+    formData.append('description', e.target.description.value);
+    formData.append('packageType', selectedTiers.join(','));
+    formData.append('amenities', e.target.amenities.value);
+    formData.append('isActive', isActive);
+    formData.append('otaApiLink', e.target.otaApiLink.value);
+
+    // Existing images (filtering out blob URLs which are previews of new files)
+    const existingImages = selectedImages.filter(img => !img.startsWith('blob:'));
+    formData.append('existingImages', JSON.stringify(existingImages));
+
+    // New image files
+    newImageFiles.forEach((file) => {
+      formData.append('images', file);
+    });
 
     try {
       if (initialData?._id || initialData?.id) {
@@ -150,6 +158,8 @@ export function HotelForm({ onClose, initialData }) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Select</SelectItem>
+                <SelectItem value="1">1 Star</SelectItem>
+                <SelectItem value="2">2 Star</SelectItem>
                 <SelectItem value="3">3 Star</SelectItem>
                 <SelectItem value="4">4 Star</SelectItem>
                 <SelectItem value="5">5 Star</SelectItem>
@@ -229,9 +239,9 @@ export function HotelForm({ onClose, initialData }) {
                  e.preventDefault();
                  const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
                  if (files.length > 0) {
-                   // Mock adding files - in real app would upload or store File objects
                    const newImageUrls = files.map(file => URL.createObjectURL(file));
                    setSelectedImages([...selectedImages, ...newImageUrls]);
+                   setNewImageFiles([...newImageFiles, ...files]);
                  }
                }}>
             <Upload className="h-8 w-8 text-muted-foreground mb-2" />
@@ -248,6 +258,7 @@ export function HotelForm({ onClose, initialData }) {
                 if (files.length > 0) {
                   const newImageUrls = files.map(file => URL.createObjectURL(file));
                   setSelectedImages([...selectedImages, ...newImageUrls]);
+                  setNewImageFiles([...newImageFiles, ...files]);
                 }
               }}
             />
@@ -266,7 +277,18 @@ export function HotelForm({ onClose, initialData }) {
                     variant="destructive"
                     size="icon"
                     className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => setSelectedImages(selectedImages.filter((_, i) => i !== index))}
+                    onClick={() => {
+                      const imgToRemoving = selectedImages[index];
+                      setSelectedImages(selectedImages.filter((_, i) => i !== index));
+                      
+                      // If it was a new file, remove from files list too
+                      if (imgToRemoving.startsWith('blob:')) {
+                        // This assumes the order in newImageFiles matches the order of blob: URLs in selectedImages
+                        // A more robust way would be to store {url, file} objects
+                        const blobIndex = selectedImages.slice(0, index).filter(url => url.startsWith('blob:')).length;
+                        setNewImageFiles(newImageFiles.filter((_, i) => i !== blobIndex));
+                      }
+                    }}
                   >
                     <X className="h-3 w-3" />
                   </Button>

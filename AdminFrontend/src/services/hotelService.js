@@ -14,17 +14,32 @@ const hotelService = {
   },
 
   createHotel: async (hotelData) => {
-    const response = await axios.post(`${API_URL}/hotels`, hotelData);
+    const token = localStorage.getItem('adminToken');
+    const response = await axios.post(`${API_URL}/hotels`, hotelData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
     return response.data;
   },
 
   updateHotel: async (id, hotelData) => {
-    const response = await axios.put(`${API_URL}/hotels/${id}`, hotelData);
+    const token = localStorage.getItem('adminToken');
+    const response = await axios.put(`${API_URL}/hotels/${id}`, hotelData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
     return response.data;
   },
 
   deleteHotel: async (id) => {
-    const response = await axios.delete(`${API_URL}/hotels/${id}`);
+    const token = localStorage.getItem('adminToken');
+    const response = await axios.delete(`${API_URL}/hotels/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
     return response.data;
   },
 };

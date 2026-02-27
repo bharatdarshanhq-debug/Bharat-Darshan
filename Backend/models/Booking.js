@@ -202,12 +202,24 @@ bookingSchema.virtual('bookingId').get(function () {
 bookingSchema.pre('save', async function (next) {
   if (this.isNew && !this.bookingNumber) {
     try {
-      const counter = await Counter.findByIdAndUpdate(
-        'bookingNumber',
-        { $inc: { seq: 1 } },
-        { new: true, upsert: true }
-      );
-      this.bookingNumber = counter.seq;
+      const BookingModel = mongoose.models.Booking || mongoose.model('Booking', bookingSchema);
+      const count = await BookingModel.countDocuments();
+      
+      if (count === 0) {
+        const counter = await Counter.findByIdAndUpdate(
+          'bookingNumber',
+          { seq: 1 },
+          { new: true, upsert: true }
+        );
+        this.bookingNumber = 1;
+      } else {
+        const counter = await Counter.findByIdAndUpdate(
+          'bookingNumber',
+          { $inc: { seq: 1 } },
+          { new: true, upsert: true }
+        );
+        this.bookingNumber = counter.seq;
+      }
     } catch (error) {
       return next(error);
     }

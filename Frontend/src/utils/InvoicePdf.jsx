@@ -559,12 +559,9 @@ export async function generateInvoicePdf(booking) {
   doc.text("Your Trusted Travel Partner", margin + 4, footerY + 14);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
+  doc.setFontSize(10);
   doc.setTextColor(...DARK);
-  doc.text("Founded by:", margin + 4, footerY + 22);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text("Bhabani Prasad Das Mohapatra", margin + 4, footerY + 28);
+  doc.text("Booking Via Jungle Resort Pvt. Ltd.", margin + 4, footerY + 22);
 
   // Right: Authorized Signature
   doc.setDrawColor(...DARK);

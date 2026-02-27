@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Users, Phone, MessageSquare, CreditCard, Shield, Loader2 } from 'lucide-react';
+import { X, Calendar, Users, Phone, MessageSquare, CreditCard, Shield, Loader2, Check } from 'lucide-react';
 import { FaHotel } from 'react-icons/fa';
 import { Button } from '@/components/ui/forms';
 import { sonnerToast as toast } from '@/components/ui/feedback';
@@ -178,7 +178,7 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2,
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+          className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -195,41 +195,92 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2,
             </button>
           </div>
 
-          {/* Content */}
-          <div className="p-6 space-y-6">
-            {/* Package Summary */}
-            <div className="bg-orange-50 rounded-2xl p-4 flex gap-4">
-              <img
-                src={pkg.image}
-                alt={pkg.name}
-                className="w-20 h-20 rounded-xl object-cover"
-              />
-              <div className="flex-1">
-                <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${
-                  pkg.type === 'Elite' ? 'bg-gray-900 text-amber-400' :
-                  pkg.type === 'Pro' ? 'bg-orange-100 text-orange-600' :
-                  'bg-green-100 text-green-600'
-                }`}>
-                  {pkg.type}
-                </span>
-                <h3 className="font-medium mt-1">{pkg.name}</h3>
-                <p className="text-sm text-gray-500">{pkg.duration}</p>
-              </div>
-            </div>
+          <div className="flex-1 overflow-y-auto">
+            <div className="grid md:grid-cols-2">
+              {/* Left Column: Info & Trust */}
+              <div className="bg-gray-50/50 p-6 sm:p-8 space-y-8 border-r border-gray-100">
+                {/* Package Summary */}
+                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex gap-4">
+                  <img
+                    src={pkg.image}
+                    alt={pkg.name}
+                    className="w-24 h-24 rounded-xl object-cover"
+                  />
+                  <div className="flex-1">
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${
+                      pkg.type === 'Elite' ? 'bg-gray-900 text-amber-400' :
+                      pkg.type === 'Pro' ? 'bg-orange-100 text-orange-600' :
+                      'bg-green-100 text-green-600'
+                    }`}>
+                      {pkg.type} Tier
+                    </span>
+                    <h3 className="font-serif text-lg font-bold mt-1 text-gray-900">{pkg.name}</h3>
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {pkg.duration}
+                    </div>
+                  </div>
+                </div>
 
-            {/* Selected Hotel info if available */}
-            {selectedHotel && (
-              <div className="bg-green-50 rounded-2xl p-4 flex gap-4 border border-green-100">
-                 <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <FaHotel className="text-green-600" />
-                 </div>
-                 <div>
-                    <p className="text-xs text-green-600 font-bold uppercase tracking-wider">Selected Hotel</p>
-                    <h4 className="font-bold text-gray-900">{selectedHotel.name}</h4>
-                    <p className="text-sm text-gray-500">{selectedHotel.destination}</p>
-                 </div>
+                {/* Selected Hotel info if available */}
+                {selectedHotel && (
+                  <div className="bg-green-50 rounded-2xl p-5 border border-green-100 flex gap-4">
+                     <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                        <FaHotel className="text-green-600 text-xl" />
+                     </div>
+                     <div>
+                        <p className="text-xs text-green-600 font-bold uppercase tracking-widest mb-1">Accommodation Confirmed</p>
+                        <h4 className="font-bold text-gray-900">{selectedHotel.name}</h4>
+                        <p className="text-sm text-gray-500">{selectedHotel.destination}</p>
+                     </div>
+                  </div>
+                )}
+
+                {/* What's Included */}
+                {pkg.included && pkg.included.length > 0 && (
+                  <div>
+                    <h4 className="font-serif text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-orange-600" />
+                      Package Inclusions
+                    </h4>
+                    <ul className="grid grid-cols-1 gap-3">
+                      {pkg.included.slice(0, 6).map((item, i) => (
+                        <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
+                          <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Why Book with Us */}
+                <div className="bg-orange-600 text-white rounded-2xl p-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full translate-x-8 -translate-y-8 blur-2xl" />
+                  <h4 className="font-serif text-lg font-bold mb-4 relative z-10">Why book with us?</h4>
+                  <ul className="space-y-3 relative z-10">
+                    <li className="flex items-center gap-3 text-sm text-orange-50">
+                      <div className="w-1.5 h-1.5 rounded-full bg-orange-300" />
+                      Instant Booking Confirmation
+                    </li>
+                    <li className="flex items-center gap-3 text-sm text-orange-50">
+                      <div className="w-1.5 h-1.5 rounded-full bg-orange-300" />
+                      Verified Quality Accommodations
+                    </li>
+                    <li className="flex items-center gap-3 text-sm text-orange-50">
+                      <div className="w-1.5 h-1.5 rounded-full bg-orange-300" />
+                      24/7 On-Trip Support
+                    </li>
+                    <li className="flex items-center gap-3 text-sm text-orange-50">
+                      <div className="w-1.5 h-1.5 rounded-full bg-orange-300" />
+                      Transparent Dynamic Pricing
+                    </li>
+                  </ul>
+                </div>
               </div>
-            )}
+
+              {/* Right Column: Form */}
+              <div className="p-6 sm:p-8 space-y-8">
 
             {/* Form Fields */}
             <div className="space-y-4">
@@ -354,26 +405,54 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2,
               <span>Secure payment powered by Razorpay</span>
             </div>
           </div>
+          </div>
+        </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 bg-white rounded-b-3xl border-t border-gray-100 p-6">
+          <div className="bg-white border-t border-gray-100 p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+              <div className="text-center sm:text-left">
+                <p className="text-sm text-gray-500 font-medium">Grand Total</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold text-gray-900">₹{totalPrice.toLocaleString()}</span>
+                  {totalOriginalPrice > totalPrice && (
+                    <span className="text-lg text-gray-400 line-through">₹{totalOriginalPrice.toLocaleString()}</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col items-center sm:items-end">
+                {savings > 0 && (
+                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold mb-1">
+                    Saved ₹{savings.toLocaleString()} ({discountPercentage}% OFF)
+                  </span>
+                )}
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Shield className="w-3 h-3 text-green-500" />
+                  Secure Checkout
+                </div>
+              </div>
+            </div>
+
             <Button
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full h-14 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-lg font-medium shadow-lg shadow-orange-200"
+              className="w-full h-16 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-700 hover:to-amber-600 text-white rounded-2xl text-xl font-bold shadow-xl shadow-orange-100 transition-all duration-300"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  <Loader2 className="w-6 h-6 mr-3 animate-spin" />
                   Processing...
                 </>
               ) : (
                 <>
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Pay ₹{totalPrice.toLocaleString()}
+                  <CreditCard className="w-6 h-6 mr-3" />
+                  Confirm & Pay ₹{totalPrice.toLocaleString()}
                 </>
               )}
             </Button>
+            <p className="text-center text-[10px] text-gray-400 mt-4 uppercase tracking-widest font-bold">
+              Payments are processed securely via Razorpay
+            </p>
           </div>
         </motion.div>
       </motion.div>

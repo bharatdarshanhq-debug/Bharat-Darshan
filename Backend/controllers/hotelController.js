@@ -60,17 +60,26 @@ const getHotelById = async (req, res) => {
 // @access  Admin (Protected)
 const createHotel = async (req, res) => {
   try {
-    const { 
-      name, 
-      destination, 
-      location, 
-      packageType, 
-      images, 
-      amenities, 
-      description, 
-      rating,
-      otaApiLink 
-    } = req.body;
+    const { processUploadedFiles } = require('../utils/imageUpload');
+    
+    // Parse body fields if sent as FormData
+    const name = req.body.name;
+    const destination = req.body.destination;
+    const location = req.body.location;
+    const packageType = Array.isArray(req.body.packageType) ? req.body.packageType : 
+                      (typeof req.body.packageType === 'string' ? req.body.packageType.split(',') : req.body.packageType);
+    const amenities = Array.isArray(req.body.amenities) ? req.body.amenities :
+                     (typeof req.body.amenities === 'string' ? req.body.amenities.split(',').map(a => a.trim()) : []);
+    const description = req.body.description;
+    const rating = Number(req.body.rating) || 0;
+    const otaApiLink = req.body.otaApiLink;
+
+    // Process uploaded images
+    const uploadedFiles = await processUploadedFiles(req.files || {}, {
+      images: 'hotels',
+    });
+
+    const images = Array.isArray(uploadedFiles.images) ? uploadedFiles.images : (uploadedFiles.images ? [uploadedFiles.images] : []);
 
     const hotel = new Hotel({
       name,
@@ -87,6 +96,7 @@ const createHotel = async (req, res) => {
     const createdHotel = await hotel.save();
     res.status(201).json(createdHotel);
   } catch (error) {
+    console.error('createHotel Error:', error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -96,39 +106,66 @@ const createHotel = async (req, res) => {
 // @access  Admin (Protected)
 const updateHotel = async (req, res) => {
   try {
-    const { 
-      name, 
-      destination, 
-      location, 
-      packageType, 
-      images, 
-      amenities, 
-      description, 
-      rating, 
-      isActive,
-      otaApiLink 
-    } = req.body;
-
+    const { processUploadedFiles } = require('../utils/imageUpload');
+    
     const hotel = await Hotel.findById(req.params.id);
-
-    if (hotel) {
-      hotel.name = name || hotel.name;
-      hotel.destination = destination || hotel.destination;
-      hotel.location = location || hotel.location;
-      hotel.packageType = packageType || hotel.packageType;
-      hotel.images = images || hotel.images;
-      hotel.amenities = amenities || hotel.amenities;
-      hotel.description = description || hotel.description;
-      hotel.rating = rating !== undefined ? rating : hotel.rating;
-      hotel.isActive = isActive !== undefined ? isActive : hotel.isActive;
-      hotel.otaApiLink = otaApiLink !== undefined ? otaApiLink : hotel.otaApiLink;
-
-      const updatedHotel = await hotel.save();
-      res.json(updatedHotel);
-    } else {
-      res.status(404).json({ message: 'Hotel not found' });
+    if (!hotel) {
+      return res.status(404).json({ message: 'Hotel not found' });
     }
+
+    // Process new uploaded images
+    const uploadedFiles = await processUploadedFiles(req.files || {}, {
+      images: 'hotels',
+    });
+
+    // Handle images: combine existing (non-deleted) with new uploads
+    let finalImages = [];
+    
+    // If we have existing images passed back as a JSON string or array
+    if (req.body.existingImages) {
+      finalImages = Array.isArray(req.body.existingImages) ? req.body.existingImages : 
+                   (typeof req.body.existingImages === 'string' ? JSON.parse(req.body.existingImages) : []);
+    } else {
+      // Fallback: if no existingImages field, maybe they didn't change the gallery?
+      // But usually in FormData we explicitly send what's kept.
+      // Let's assume if it's missing, we keep existing ones that aren't replaced.
+      // However, the standard way with our frontend change will be to send existingImages.
+    }
+
+    // Add new uploads
+    if (uploadedFiles.images) {
+      const newImages = Array.isArray(uploadedFiles.images) ? uploadedFiles.images : [uploadedFiles.images];
+      finalImages = [...finalImages, ...newImages];
+    }
+
+    // If finalImages is empty and no new uploads, keep current if not explicitly cleared
+    if (finalImages.length === 0 && !req.body.existingImages && (!req.files || !req.files.images)) {
+      finalImages = hotel.images;
+    }
+
+    hotel.name = req.body.name || hotel.name;
+    hotel.destination = req.body.destination || hotel.destination;
+    hotel.location = req.body.location || hotel.location;
+    
+    if (req.body.packageType) {
+      hotel.packageType = Array.isArray(req.body.packageType) ? req.body.packageType : req.body.packageType.split(',');
+    }
+    
+    hotel.images = finalImages;
+    
+    if (req.body.amenities) {
+      hotel.amenities = Array.isArray(req.body.amenities) ? req.body.amenities : req.body.amenities.split(',').map(a => a.trim());
+    }
+    
+    hotel.description = req.body.description !== undefined ? req.body.description : hotel.description;
+    hotel.rating = req.body.rating !== undefined ? Number(req.body.rating) : hotel.rating;
+    hotel.isActive = req.body.isActive !== undefined ? (req.body.isActive === 'true' || req.body.isActive === true) : hotel.isActive;
+    hotel.otaApiLink = req.body.otaApiLink !== undefined ? req.body.otaApiLink : hotel.otaApiLink;
+
+    const updatedHotel = await hotel.save();
+    res.json(updatedHotel);
   } catch (error) {
+    console.error('updateHotel Error:', error);
     res.status(400).json({ message: error.message });
   }
 };
