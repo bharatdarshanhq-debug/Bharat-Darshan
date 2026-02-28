@@ -238,6 +238,11 @@ const Navbar = () => {
                         My Profile
                       </Button>
                     </Link>
+                    <Link to="/bookings" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full mb-2" size="lg">
+                        My Bookings
+                      </Button>
+                    </Link>
                     <Button 
                       variant="outline" 
                       className="w-full mb-2 text-red-500 border-red-200 hover:bg-red-50" 
