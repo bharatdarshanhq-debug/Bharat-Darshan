@@ -433,6 +433,36 @@ const deleteBooking = async (req, res) => {
   }
 };
 
+const { generateInvoicePdf, getBookingId } = require('../utils/invoiceGenerator');
+
+// @desc    Download invoice PDF
+// @route   GET /api/bookings/:id/invoice
+// @access  Public (Secured by ID)
+const downloadInvoice = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ success: false, error: 'Booking not found' });
+    }
+
+    // Generate PDF
+    const pdfBuffer = await generateInvoicePdf(booking);
+    
+    // Set response headers for download
+    const filename = `Bharat_Darshan_Invoice_${getBookingId(booking)}.pdf`;
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error('Invoice generation error:', error);
+    res.status(500).json({ success: false, error: 'Failed to generate invoice' });
+  }
+};
+
 module.exports = {
   createBooking,
   getBookings,
@@ -444,4 +474,5 @@ module.exports = {
   approveCancellation,
   rejectCancellation,
   deleteBooking,
+  downloadInvoice,
 };

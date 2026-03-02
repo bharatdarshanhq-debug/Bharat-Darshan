@@ -1,7 +1,7 @@
 ﻿import { Toaster, SonnerToaster as Sonner } from "@/components/ui/feedback";
 import { TooltipProvider } from "@/components/ui/overlay";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import Destinations from "./pages/Destinations";
@@ -19,6 +19,7 @@ import BookingSuccess from "./pages/BookingSuccess";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
+import DownloadInvoice from "./pages/DownloadInvoice";
 
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -49,6 +50,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/destinations" element={<Destinations />} />
+      <Route path="/package" element={<Navigate to="/packages?state=odisha" replace />} />
       <Route path="/packages" element={<Packages />} />
       <Route path="/packages/:id" element={<PackageDetail />} />
       <Route path="/experiences" element={<Experiences />} />
@@ -63,6 +65,7 @@ const AppRoutes = () => {
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
       <Route path="/refund" element={<RefundPolicy />} />
+      <Route path="/download-invoice/:bookingId" element={<DownloadInvoice />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

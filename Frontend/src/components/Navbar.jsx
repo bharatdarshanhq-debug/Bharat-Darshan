@@ -9,7 +9,7 @@ import Logo from "@/assets/Logo_Bharat_Darshan.webp";
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "Destinations", path: "/destinations" },
-  { name: "Packages", path: "/packages" },
+  { name: "Packages", path: "/packages?state=odisha" },
   { name: "Experiences", path: "/experiences" },
   { name: "Contact", path: "/contact" },
 ];
@@ -105,7 +105,7 @@ const Navbar = () => {
 
             {/* CTA Button / Profile */}
             <div className="hidden md:flex items-center gap-4 mr-24">
-              <Link to="/packages">
+              <Link to="/packages?state=odisha">
                 <Button variant="hero" size="lg">
                   Book Now
                 </Button>
@@ -262,7 +262,7 @@ const Navbar = () => {
                     </Button>
                   </Link>
                 )}
-                <Link to="/packages" onClick={() => setIsOpen(false)}>
+                <Link to="/packages?state=odisha" onClick={() => setIsOpen(false)}>
                   <Button variant="hero" className="w-full" size="lg">
                     Book Now
                   </Button>

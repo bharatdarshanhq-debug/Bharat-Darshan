@@ -337,7 +337,7 @@ const BookingDetail = () => {
                       )}
                       {booking.refundAmount === 0 && (
                         <div className="bg-white/60 dark:bg-black/20 rounded-xl p-3 text-center">
-                          <span className="text-red-600 font-medium">No refund applicable (booking cancelled within 7 days of trip)</span>
+                          <span className="text-red-600 font-medium">No refund applicable (booking cancelled within 2 days of trip)</span>
                         </div>
                       )}
                     </div>

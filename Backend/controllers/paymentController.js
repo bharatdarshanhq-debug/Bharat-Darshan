@@ -1,6 +1,7 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const Booking = require('../models/Booking');
+const { sendBookingConfirmationEmail } = require('../utils/mailHelper');
 
 // Initialize Razorpay only if credentials are available
 // Initialize Razorpay only if credentials are available
@@ -159,6 +160,11 @@ const verifyPayment = async (req, res) => {
           },
         },
         { new: true }
+      );
+
+      // Fire-and-forget booking confirmation email
+      sendBookingConfirmationEmail(booking).catch(err => 
+        console.error('[Email] Background error:', err.message)
       );
 
       res.json({

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Users, Phone, MessageSquare, CreditCard, Shield, Loader2, Check } from 'lucide-react';
+import { X, Calendar, Users, Phone, MessageSquare, CreditCard, Shield, Loader2, Check, Info } from 'lucide-react';
 import { FaHotel } from 'react-icons/fa';
 import { Button } from '@/components/ui/forms';
 import { sonnerToast as toast } from '@/components/ui/feedback';
@@ -40,11 +40,14 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2,
   const totalOriginalPrice = calculateTotal(numericOriginalPrice);
   const savings = (totalOriginalPrice > totalPrice) ? (totalOriginalPrice - totalPrice) : 0;
 
-  // Get minimum date (tomorrow)
+  // Get minimum date (7 days from now) - Local time aware
   const getMinDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    const minDate = new Date();
+    minDate.setDate(minDate.getDate() + 7);
+    const year = minDate.getFullYear();
+    const month = String(minDate.getMonth() + 1).padStart(2, '0');
+    const day = String(minDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const handleSubmit = async () => {
@@ -297,6 +300,9 @@ const BookingModal = ({ isOpen, onClose, pkg, user, token, initialTravelers = 2,
                   onChange={(e) => setTripDate(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all"
                 />
+                <p className="text-[10px] text-orange-600 font-bold mt-1.5 flex items-center gap-1 uppercase tracking-wider">
+                  <Info className="w-3 h-3" /> Minimum 7 days advance booking required
+                </p>
               </div>
 
               {/* Travelers */}

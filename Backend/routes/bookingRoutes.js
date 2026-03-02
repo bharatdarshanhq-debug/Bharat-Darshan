@@ -11,6 +11,7 @@ const {
   approveCancellation,
   rejectCancellation,
   deleteBooking,
+  downloadInvoice,
 } = require('../controllers/bookingController');
 const { processRefund } = require('../controllers/paymentController');
 const { protect } = require('../middleware/authMiddleware');
@@ -35,6 +36,9 @@ router.put('/:id/request-cancel', protect, requestCancellation);
 router.put('/:id/approve-cancel', protect, approveCancellation);
 router.put('/:id/reject-cancel', protect, rejectCancellation);
 router.post('/:id/process-refund', protect, processRefund);
+
+// Publicly accessible download (secured by the unique booking ID)
+router.get('/:id/invoice', downloadInvoice);
 
 module.exports = router;
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 /**
- * SEO Component for managing dynamic meta tags.
+//  * SEO Component for managing dynamic meta tags.
  * The SEO team can provide values for these props for each page.
  * 
  * @param {Object} props

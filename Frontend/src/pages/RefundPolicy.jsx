@@ -43,20 +43,24 @@ const RefundPolicy = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">30 Days or more</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">20 Days or more</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-bold">100% Refund *</td>
                       </tr>
                       <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">15 - 29 Days</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">75% Refund</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">15 - 20 Days</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">85% Refund</td>
                       </tr>
                       <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">7 - 14 Days</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">7 - 15 Days</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">70% Refund</td>
+                      </tr>
+                      <tr>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">2 - 7 Days</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">50% Refund</td>
                       </tr>
                       <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Less than 7 Days</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">No Refund</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 underline decoration-red-200 underline-offset-4">Less than 2 Days</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-bold">No Refund</td>
                       </tr>
                     </tbody>
                   </table>

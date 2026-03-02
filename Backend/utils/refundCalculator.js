@@ -21,14 +21,16 @@ const calculateRefund = (totalPrice, tripDate) => {
 
   let refundPercentage = 0;
 
-  if (daysUntilTrip >= 30) {
+  if (daysUntilTrip >= 20) {
     refundPercentage = 100;
   } else if (daysUntilTrip >= 15) {
-    refundPercentage = 75;
+    refundPercentage = 85;
   } else if (daysUntilTrip >= 7) {
+    refundPercentage = 70;
+  } else if (daysUntilTrip >= 2) {
     refundPercentage = 50;
   }
-  // < 7 days = 0% refund
+  // < 2 days = 0% refund
 
   const refundAmount = Math.round(totalPrice * (refundPercentage / 100));
 

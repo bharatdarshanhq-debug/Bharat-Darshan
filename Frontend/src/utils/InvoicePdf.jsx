@@ -579,5 +579,6 @@ export async function generateInvoicePdf(booking) {
   drawPageFooterBar();
 
   // ── Save ─────────────────────────────────
-  doc.save("Invoicepdf.pdf");
+  const fileName = `Bharat_Darshan_Invoice_${getBookingId(booking)}.pdf`;
+  doc.save(fileName);
 }

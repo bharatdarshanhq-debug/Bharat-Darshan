@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/forms";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookingModal from "@/components/BookingModal";
+import BookingConsentModal from "@/components/BookingConsentModal";
 import { fetchPackageById } from "@/services/packageService";
 import { useSettings } from "@/context/SettingsContext";
 
@@ -23,6 +24,7 @@ const PackageDetail = () => {
   const [pkg, setPkg] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showConsentModal, setShowConsentModal] = useState(false);
   const user = JSON.parse(localStorage.getItem('user') || 'null');
   const token = localStorage.getItem('token');
 
@@ -81,7 +83,13 @@ const PackageDetail = () => {
       navigate('/login', { state: { from: `/packages/${id}` } });
       return;
     }
-    // Navigate to hotel selection first
+    // Show consent modal before proceeding
+    setShowConsentModal(true);
+  };
+
+  const handleConsentAccept = () => {
+    setShowConsentModal(false);
+    // Navigate to hotel selection after consent
     navigate(`/packages/${id}/hotels`, { state: { travelers } });
   };
 
@@ -501,6 +509,12 @@ const PackageDetail = () => {
       <Footer />
 
       {/* Booking Modal */}
+      <BookingConsentModal 
+        isOpen={showConsentModal}
+        onClose={() => setShowConsentModal(false)}
+        onAccept={handleConsentAccept}
+        packageName={pkg.name}
+      />
     </div>
   );
 };
